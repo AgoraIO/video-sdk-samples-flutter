@@ -5,7 +5,7 @@ import 'package:permission_handler/permission_handler.dart';
 import 'package:agora_manager/agora_manager.dart';
 import 'package:agora_rtc_engine/agora_rtc_engine.dart';
 
-const String appId = "<--Insert app ID here-->";
+const String appId = "9d2498880e934632b38b0a68fa2f1622";
 
 void main() => runApp(const MaterialApp(home: MyApp()));
 
@@ -117,11 +117,14 @@ class _MyAppState extends State<MyApp> {
   }
 
   @override
-  void initState() {
+  Future<void> initState() async {
     super.initState();
     // Set up an instance of AgoraManager
-    agoraManager = AgoraManager();
-
+    agoraManager =await AgoraManager.create(
+        messageCallback: showMessage,
+        eventCallback: eventCallback
+    );
+    showMessage(agoraManager.appId);
     setupVideoSDKEngine();
   }
 
@@ -194,6 +197,12 @@ class _MyAppState extends State<MyApp> {
     await agoraEngine.leaveChannel();
     agoraEngine.release();
     super.dispose();
+  }
+
+  void eventCallback(String eventName, Map<String, dynamic> eventArgs) {
+    // Handle the event based on the event name and named arguments
+    print('Event Name: $eventName');
+    print('Event Args: $eventArgs');
   }
 
   showMessage(String message) {

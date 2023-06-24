@@ -1,5 +1,5 @@
 name: agora_manager
-description: A new Flutter package project.
+description: Wrapper class for Agora engine.
 version: 0.0.1
 homepage:
 
@@ -23,6 +23,8 @@ dev_dependencies:
 
 # The following section is specific to Flutter packages.
 flutter:
+  assets:
+    - assets/config/config.json
 
   # To add assets to your package, add an assets section, like this:
   # assets:
