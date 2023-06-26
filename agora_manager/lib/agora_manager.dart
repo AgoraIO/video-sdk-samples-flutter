@@ -48,6 +48,25 @@ class AgoraManager {
     }
   }
 
+  AgoraVideoView remoteVideoView() {
+    return AgoraVideoView(
+      controller: VideoViewController.remote(
+        rtcEngine: agoraEngine,
+        canvas: VideoCanvas(uid: remoteUid),
+        connection: RtcConnection(channelId: channelName),
+      ),
+    );
+  }
+
+  AgoraVideoView localVideoView() {
+    return AgoraVideoView(
+      controller: VideoViewController(
+        rtcEngine: agoraEngine,
+        canvas: const VideoCanvas(uid: 0), // always set uid = 0 for local view
+      ),
+    );
+  }
+
   Future<void> setupVideoSDKEngine() async {
     // retrieve or request camera and microphone permissions
     await [Permission.microphone, Permission.camera].request();
@@ -61,9 +80,14 @@ class AgoraManager {
     // Register the event handler
     agoraEngine.registerEventHandler(
       RtcEngineEventHandler(
-        onConnectionStateChanged: (RtcConnection connection, ConnectionStateType state,
-            ConnectionChangedReasonType reason){
-          messageCallback('Connection state: ${state}, reason: ${reason}');
+        onConnectionStateChanged: (RtcConnection connection,
+            ConnectionStateType state, ConnectionChangedReasonType reason) {
+          //messageCallback('Connection state: ${state}, reason: ${reason}');
+          if (reason ==
+              ConnectionChangedReasonType.connectionChangedLeaveChannel) {
+            this.remoteUid = null;
+            isJoined = false;
+          }
           Map<String, dynamic> eventArgs = {};
           eventArgs["connection"] = connection;
           eventArgs["state"] = state;
@@ -119,13 +143,14 @@ class AgoraManager {
     );
   }
 
-  void leave() {
-    if (isJoined) agoraEngine.leaveChannel();
+  Future<void> leave() async {
+    remoteUid = null;
     isJoined = false;
+    await agoraEngine.leaveChannel();
   }
 
   Future<void> dispose() async {
-    leave();
+    await leave();
     agoraEngine.release();
   }
 }

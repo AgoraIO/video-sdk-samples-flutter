@@ -18,13 +18,16 @@ class _MyAppState extends State<MyApp> {
   final GlobalKey<ScaffoldMessengerState> scaffoldMessengerKey =
       GlobalKey<ScaffoldMessengerState>(); // Global key to access the scaffold
 
-  bool _isJoined() {
+  bool _isJoined = false;
+  int? _remoteUid;
+  
+  /*bool _isJoined {
     if (isAgoraManagerInitialized) {
       return agoraManager.isJoined;
     } else {
       return false;
     }
-  }
+  } */
 
   // Build UI
   @override
@@ -51,11 +54,13 @@ class _MyAppState extends State<MyApp> {
                 decoration: BoxDecoration(border: Border.all()),
                 child: Center(child: _remoteVideo()),
               ),
-              Expanded(
+              const SizedBox(height: 10),
+              SizedBox(
+                height: 40,
                 child: ElevatedButton(
                   onPressed:
-                      _isJoined() ? () => {leave()} : () => {join()},
-                  child: Text(_isJoined() ? "Leave" : "Join"),
+                      _isJoined ? () => {leave()} : () => {join()},
+                  child: Text(_isJoined ? "Leave" : "Join"),
                 ),
               ),
             ],
@@ -65,13 +70,8 @@ class _MyAppState extends State<MyApp> {
 
 // Display local video preview
   Widget _localPreview() {
-    if (_isJoined()) {
-      return AgoraVideoView(
-        controller: VideoViewController(
-          rtcEngine: agoraManager.agoraEngine,
-          canvas: const VideoCanvas(uid: 0),
-        ),
-      );
+    if (_isJoined) {
+      return agoraManager.localVideoView();
     } else {
       return const Text(
         'Join a channel',
@@ -82,17 +82,11 @@ class _MyAppState extends State<MyApp> {
 
 // Display remote user's video
   Widget _remoteVideo() {
-    if (isAgoraManagerInitialized && agoraManager.remoteUid != null) {
-      return AgoraVideoView(
-        controller: VideoViewController.remote(
-          rtcEngine: agoraManager.agoraEngine,
-          canvas: VideoCanvas(uid: agoraManager.remoteUid),
-          connection: RtcConnection(channelId: agoraManager.channelName),
-        ),
-      );
+    if (_remoteUid != null) {
+      return agoraManager.remoteVideoView();
     } else {
       return Text(
-        _isJoined() ? 'Waiting for a remote user to join' : '',
+        _isJoined ? 'Waiting for a remote user to join' : '',
         textAlign: TextAlign.center,
       );
     }
@@ -118,19 +112,21 @@ class _MyAppState extends State<MyApp> {
 
   }
 
-  void join() {
-    agoraManager.join();
-    setState(() { });
+  Future<void> join() async {
+    await agoraManager.join();
   }
 
-  void leave() {
-    agoraManager.leave();
-    setState(() { });
+  Future<void> leave() async {
+    setState(() {
+      _isJoined = false;
+      _remoteUid = null;
+    });
+    await agoraManager.leave();
   }
 
   // Release the resources when you leave
   @override
-  void dispose() async {
+  Future<void> dispose() async {
     await agoraManager.dispose();
     super.dispose();
   }
@@ -140,18 +136,29 @@ class _MyAppState extends State<MyApp> {
     switch (eventName) {
       case 'onConnectionStateChanged':
         // Connection state changed
+        if (eventArgs["reason"] == ConnectionChangedReasonType.connectionChangedLeaveChannel) {
+          setState(() {
+            _isJoined = false;
+          });
+        }
         break;
 
       case 'onJoinChannelSuccess':
-        setState(() {});
+        setState(() {
+          _isJoined = true;
+        });
         break;
 
       case 'onUserJoined':
-        setState(() {});
+        setState(() {
+          _remoteUid = eventArgs["remoteUid"];
+        });
         break;
 
       case 'onUserOffline':
-        setState(() {});
+        setState(() {
+          _remoteUid = null;
+        });
         break;
 
       default:
