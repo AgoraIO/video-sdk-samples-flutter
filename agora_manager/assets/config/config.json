@@ -2,7 +2,7 @@
     "uid": 100,
     "appId": "9d2498880e934632b38b0a68fa2f1622",
     "channelName": "demo",
-    "token": "007eJxTYFg3+6Sc9fsvnJ7Vh4oZ3tU/WZBy8difdIkNXEydD1VPLpdXYLBMMTKxtLCwMEi1NDYxMzZKMrZIMkg0s0hLNEozNDMyOntlekpDICND6rs0RkYGCATxWRhSUnPzGRgAmnIghQ==",
+    "token": "007eJxTYBB6qPylrsf0VpdvqNg/Bcaw8q3ndqSeePCzL4t3z8p/9p8VGCxTjEwsLSwsDFItjU3MjI2SjC2SDBLNLNISjdIMzYyMRHhmpjQEMjLM5dVjZWSAQBCfhSElNTefgQEAaY8exA==",
     "proxyUrl": "<---- Your Proxy Server URL ---->",
     "serverUrl": "<---- Your Token Generator Server URL ---->",
     "tokenExpiryTime": "<---- Time for tokens to expire (in seconds) ---->"
