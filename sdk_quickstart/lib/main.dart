@@ -18,16 +18,16 @@ class _MyAppState extends State<MyApp> {
   final GlobalKey<ScaffoldMessengerState> scaffoldMessengerKey =
       GlobalKey<ScaffoldMessengerState>(); // Global key to access the scaffold
 
-  bool _isJoined = false;
-  int? _remoteUid;
+  //bool _isJoined = false;
+  //int? _remoteUid;
   
-  /*bool _isJoined {
+  bool _isJoined() {
     if (isAgoraManagerInitialized) {
       return agoraManager.isJoined;
     } else {
       return false;
     }
-  } */
+  }
 
   // Build UI
   @override
@@ -59,8 +59,8 @@ class _MyAppState extends State<MyApp> {
                 height: 40,
                 child: ElevatedButton(
                   onPressed:
-                      _isJoined ? () => {leave()} : () => {join()},
-                  child: Text(_isJoined ? "Leave" : "Join"),
+                      _isJoined() ? () => {leave()} : () => {join()},
+                  child: Text(_isJoined() ? "Leave" : "Join"),
                 ),
               ),
             ],
@@ -70,7 +70,7 @@ class _MyAppState extends State<MyApp> {
 
 // Display local video preview
   Widget _localPreview() {
-    if (_isJoined) {
+    if (_isJoined()) {
       return agoraManager.localVideoView();
     } else {
       return const Text(
@@ -82,11 +82,16 @@ class _MyAppState extends State<MyApp> {
 
 // Display remote user's video
   Widget _remoteVideo() {
-    if (_remoteUid != null) {
-      return agoraManager.remoteVideoView();
+    if (isAgoraManagerInitialized && agoraManager.remoteUid != null) {
+      try {
+        return agoraManager.remoteVideoView();
+      } catch (e) {
+        showMessage("error!");
+        return const Text('error');
+      }
     } else {
       return Text(
-        _isJoined ? 'Waiting for a remote user to join' : '',
+        _isJoined() ? 'Waiting for a remote user to join' : '',
         textAlign: TextAlign.center,
       );
     }
@@ -106,9 +111,9 @@ class _MyAppState extends State<MyApp> {
     );
     await agoraManager.setupVideoSDKEngine();
 
-    setState(() {
+  /*  setState(() {
       isAgoraManagerInitialized = true;
-    });
+    }); */
 
   }
 
@@ -117,10 +122,10 @@ class _MyAppState extends State<MyApp> {
   }
 
   Future<void> leave() async {
-    setState(() {
-      _isJoined = false;
+    /* setState(() {
+      _isJoined() = false;
       _remoteUid = null;
-    });
+    }); */
     await agoraManager.leave();
   }
 
@@ -138,26 +143,26 @@ class _MyAppState extends State<MyApp> {
         // Connection state changed
         if (eventArgs["reason"] == ConnectionChangedReasonType.connectionChangedLeaveChannel) {
           setState(() {
-            _isJoined = false;
+
           });
         }
         break;
 
       case 'onJoinChannelSuccess':
         setState(() {
-          _isJoined = true;
+
         });
         break;
 
       case 'onUserJoined':
         setState(() {
-          _remoteUid = eventArgs["remoteUid"];
+
         });
         break;
 
       case 'onUserOffline':
         setState(() {
-          _remoteUid = null;
+
         });
         break;
 
