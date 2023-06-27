@@ -5,7 +5,15 @@ import 'package:flutter/services.dart';
 import 'package:agora_rtc_engine/agora_rtc_engine.dart';
 import 'package:permission_handler/permission_handler.dart';
 
+enum ProductName {
+  videoCalling,
+  voiceCalling,
+  interactiveLiveStreaming,
+  broadcastStreaming
+}
+
 class AgoraManager {
+  ProductName currentProduct = ProductName.videoCalling;
   String appId = "", token = "", channelName = "";
   int uid = 0;
   int? remoteUid; // uid of the remote user
@@ -16,16 +24,19 @@ class AgoraManager {
   Function(String eventName, Map<String, dynamic> eventArgs) eventCallback;
 
   AgoraManager._({
+    required this.currentProduct,
     required this.messageCallback,
     required this.eventCallback,
   });
 
   static Future<AgoraManager> create({
+    required ProductName currentProduct,
     required Function(String message) messageCallback,
     required Function(String eventName, Map<String, dynamic> eventArgs)
         eventCallback,
   }) async {
     final manager = AgoraManager._(
+      currentProduct: currentProduct,
       messageCallback: messageCallback,
       eventCallback: eventCallback,
     );

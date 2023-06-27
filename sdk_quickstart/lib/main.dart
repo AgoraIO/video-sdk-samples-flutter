@@ -17,10 +17,8 @@ class _MyAppState extends State<MyApp> {
   bool isAgoraManagerInitialized = false;
   final GlobalKey<ScaffoldMessengerState> scaffoldMessengerKey =
       GlobalKey<ScaffoldMessengerState>(); // Global key to access the scaffold
+  bool _isBroadcaster = true;
 
-  //bool _isJoined = false;
-  //int? _remoteUid;
-  
   bool _isJoined() {
     if (isAgoraManagerInitialized) {
       return agoraManager.isJoined;
@@ -54,12 +52,12 @@ class _MyAppState extends State<MyApp> {
                 decoration: BoxDecoration(border: Border.all()),
                 child: Center(child: _remoteVideo()),
               ),
+              _radioButtons(),
               const SizedBox(height: 10),
               SizedBox(
                 height: 40,
                 child: ElevatedButton(
-                  onPressed:
-                      _isJoined() ? () => {leave()} : () => {join()},
+                  onPressed: _isJoined() ? () => {leave()} : () => {join()},
                   child: Text(_isJoined() ? "Leave" : "Join"),
                 ),
               ),
@@ -68,9 +66,41 @@ class _MyAppState extends State<MyApp> {
     );
   }
 
+  Widget _radioButtons() {
+    // Radio Buttons
+    if (isAgoraManagerInitialized &&
+        (agoraManager.currentProduct == ProductName.interactiveLiveStreaming ||
+            agoraManager.currentProduct == ProductName.broadcastStreaming)) {
+      return Row(children: <Widget>[
+        Radio<bool>(
+          value: true,
+          groupValue: _isBroadcaster,
+          onChanged: (value) => _handleRadioValueChange(value),
+        ),
+        const Text('Host'),
+        Radio<bool>(
+          value: false,
+          groupValue: _isBroadcaster,
+          onChanged: (value) => _handleRadioValueChange(value),
+        ),
+        const Text('Audience'),
+      ]);
+    } else {
+      return Container();
+    }
+  }
+
+  // Set the client role when a radio button is selected
+  void _handleRadioValueChange(bool? value) async {
+    setState(() {
+      _isBroadcaster = (value == true);
+    });
+    if (agoraManager.isJoined) leave();
+  }
+
 // Display local video preview
   Widget _localPreview() {
-    if (_isJoined()) {
+    if (_isJoined() && _isBroadcaster) {
       return agoraManager.localVideoView();
     } else {
       return const Text(
@@ -106,15 +136,15 @@ class _MyAppState extends State<MyApp> {
   Future<void> initialize() async {
     // Set up an instance of AgoraManager
     agoraManager = await AgoraManager.create(
+      currentProduct: ProductName.interactiveLiveStreaming,
       messageCallback: showMessage,
       eventCallback: eventCallback,
     );
     await agoraManager.setupVideoSDKEngine();
 
-  /*  setState(() {
+    setState(() {
       isAgoraManagerInitialized = true;
-    }); */
-
+    });
   }
 
   Future<void> join() async {
@@ -122,10 +152,6 @@ class _MyAppState extends State<MyApp> {
   }
 
   Future<void> leave() async {
-    /* setState(() {
-      _isJoined() = false;
-      _remoteUid = null;
-    }); */
     await agoraManager.leave();
   }
 
@@ -141,29 +167,22 @@ class _MyAppState extends State<MyApp> {
     switch (eventName) {
       case 'onConnectionStateChanged':
         // Connection state changed
-        if (eventArgs["reason"] == ConnectionChangedReasonType.connectionChangedLeaveChannel) {
-          setState(() {
-
-          });
+        if (eventArgs["reason"] ==
+            ConnectionChangedReasonType.connectionChangedLeaveChannel) {
+          setState(() {});
         }
         break;
 
       case 'onJoinChannelSuccess':
-        setState(() {
-
-        });
+        setState(() {});
         break;
 
       case 'onUserJoined':
-        setState(() {
-
-        });
+        setState(() {});
         break;
 
       case 'onUserOffline':
-        setState(() {
-
-        });
+        setState(() {});
         break;
 
       default:
