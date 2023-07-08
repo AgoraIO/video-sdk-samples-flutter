@@ -9,10 +9,10 @@ class MyApp extends StatefulWidget {
   const MyApp({Key? key}) : super(key: key);
 
   @override
-  _MyAppState createState() => _MyAppState();
+  MyAppState createState() => MyAppState();
 }
 
-class _MyAppState extends State<MyApp> {
+class MyAppState extends State<MyApp> {
   late AgoraManager agoraManager;
   bool isAgoraManagerInitialized = false;
   final GlobalKey<ScaffoldMessengerState> scaffoldMessengerKey =

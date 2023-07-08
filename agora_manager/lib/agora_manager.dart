@@ -96,7 +96,7 @@ class AgoraManager {
           //messageCallback('Connection state: ${state}, reason: ${reason}');
           if (reason ==
               ConnectionChangedReasonType.connectionChangedLeaveChannel) {
-            this.remoteUid = null;
+            remoteUid = null;
             isJoined = false;
           }
           Map<String, dynamic> eventArgs = {};
