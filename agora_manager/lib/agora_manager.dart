@@ -13,21 +13,29 @@ enum ProductName {
 }
 
 class AgoraManager {
+  late Map<String, dynamic> config;
   ProductName currentProduct = ProductName.videoCalling;
-  String appId = "", token = "", channelName = "";
-  int uid = 0;
+  //String appId = "", token = "", channelName = "";
+  //int uid = 0;
   int? remoteUid; // uid of the remote user
   bool isJoined = false; // Indicates if the local user has joined the channel
+  bool isBroadcaster = true; // Client role
   late RtcEngine agoraEngine; // Agora engine instance
 
   Function(String message) messageCallback;
   Function(String eventName, Map<String, dynamic> eventArgs) eventCallback;
 
-  AgoraManager._({
+  AgoraManager.protectedConstructor({
     required this.currentProduct,
     required this.messageCallback,
     required this.eventCallback,
   });
+
+  /*AgoraManager._({
+    required this.currentProduct,
+    required this.messageCallback,
+    required this.eventCallback,
+  });*/
 
   static Future<AgoraManager> create({
     required ProductName currentProduct,
@@ -35,25 +43,21 @@ class AgoraManager {
     required Function(String eventName, Map<String, dynamic> eventArgs)
         eventCallback,
   }) async {
-    final manager = AgoraManager._(
+    final manager = AgoraManager.protectedConstructor(
       currentProduct: currentProduct,
       messageCallback: messageCallback,
       eventCallback: eventCallback,
     );
 
-    await manager._initialize();
+    await manager.initialize();
     return manager;
   }
 
-  Future<void> _initialize() async {
+  Future<void> initialize() async {
     try {
       String configString = await rootBundle
           .loadString('packages/agora_manager/assets/config/config.json');
-      Map<String, dynamic> configData = jsonDecode(configString);
-      appId = configData['appId'];
-      token = configData['token'];
-      channelName = configData['channelName'];
-      uid = configData['uid'];
+      config = jsonDecode(configString);
     } catch (e) {
       messageCallback(e.toString());
     }
@@ -64,7 +68,7 @@ class AgoraManager {
       controller: VideoViewController.remote(
         rtcEngine: agoraEngine,
         canvas: VideoCanvas(uid: remoteUid),
-        connection: RtcConnection(channelId: channelName),
+        connection: RtcConnection(channelId: config['channelName']),
       ),
     );
   }
@@ -84,7 +88,7 @@ class AgoraManager {
 
     //create an instance of the Agora engine
     agoraEngine = createAgoraRtcEngine();
-    await agoraEngine.initialize(RtcEngineContext(appId: appId));
+    await agoraEngine.initialize(RtcEngineContext(appId: config['appId']));
 
     await agoraEngine.enableVideo();
 
@@ -133,16 +137,32 @@ class AgoraManager {
           eventArgs["reason"] = reason;
           eventCallback("onJoinChannelSuccess", eventArgs);
         },
+        onTokenPrivilegeWillExpire: (RtcConnection connection, String token) {
+          messageCallback('Token expiring...');
+          Map<String, dynamic> eventArgs = {};
+          eventArgs["connection"] = connection;
+          eventArgs["token"] = token;
+          eventCallback("onTokenPrivilegeWillExpire", eventArgs);
+        },
       ),
     );
   }
 
-  Future<void> join() async {
+  Future<void> join({
+    String channelName = '',
+    String token = '',
+    int uid = -1,
+    ClientRoleType clientRole = ClientRoleType.clientRoleBroadcaster,
+  }) async {
+    channelName = (channelName.isEmpty) ? config['channelName'] : channelName;
+    token = (token.isEmpty) ? config['rtcToken'] : token;
+    uid = (uid == -1) ? config['uid'] : uid;
+
     await agoraEngine.startPreview();
 
     // Set channel options including the client role and channel profile
-    ChannelMediaOptions options = const ChannelMediaOptions(
-      clientRoleType: ClientRoleType.clientRoleBroadcaster,
+    ChannelMediaOptions options = ChannelMediaOptions(
+      clientRoleType: clientRole,
       channelProfile: ChannelProfileType.channelProfileCommunication,
     );
 
