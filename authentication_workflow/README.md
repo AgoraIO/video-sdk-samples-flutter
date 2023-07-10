@@ -1,16 +1,19 @@
-# authentication_workflow
+# Authentication workflow
 
-A new Flutter project.
+Authentication is the act of validating the identity of each user before they access a system. Agora uses digital tokens to authenticate users and their privileges before they access Agora SD-RTN™ to join a channel. Each token is valid for a limited period and works only for a specific channel. For example, you cannot use a token generated for a channel named `AgoraChannel` to join the `AppTest` channel.
 
-## Getting Started
+This project shows you how to retrieve a token from an authentication server, and use it to connect securely to a specific Video SDK channel. To quickly set up an authentication token server for use with this project, see [Create and run a token server](https://docs.agora.io/en/video-calling/get-started/authentication-workflow?platform=flutter#create-and-run-a-token-server). To develop your own token generator and integrate it into your production IAM system, read [Token generators](https://docs.agora.io/en/video-calling/develop/integrate-token-generation).
 
-This project is a starting point for a Flutter application.
+## Understand the code
 
-A few resources to get you started if this is your first Flutter project:
+For context on this sample, and a full explanation of the essential code snippets used in this project, read the following guides:
 
-- [Lab: Write your first Flutter app](https://docs.flutter.dev/get-started/codelab)
-- [Cookbook: Useful Flutter samples](https://docs.flutter.dev/cookbook)
+* [Secure authentication with tokens for Video calling](https://docs.agora.io/en/video-calling/get-started/authentication-workflow?platform=flutter)
+* [Secure authentication with tokens for Voice calling](https://docs.agora.io/en/voice-calling/get-started/authentication-workflow?platform=flutter)
+* [Secure authentication with tokens for Interactive live Streaming](https://docs.agora.io/en/interactive-live-streaming/get-started/authentication-workflow?platform=flutter)
+* [Secure authentication with tokens for Broadcast streaming](https://docs.agora.io/en/broadcast-streaming/get-started/authentication-workflow?platform=flutter)
 
-For help getting started with Flutter development, view the
-[online documentation](https://docs.flutter.dev/), which offers tutorials,
-samples, guidance on mobile development, and a full API reference.
+
+## How to run this project
+
+To see how to run this project, refer to [README](../README.md) in the root folder or one of the complete product guides.
