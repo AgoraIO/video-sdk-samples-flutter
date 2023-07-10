@@ -1,6 +1,6 @@
-  # Agora Video SDK for Flutter sample projects
+# Agora Video SDK for Flutter sample projects
 
-This repository holds the code examples used for the [Agora Video SDK for Flutter](https://docs.agora.io/en/video-calling/get-started/get-started-sdk?platform=flutter) documentation. Clone the repo, run and test the samples, use the code in your own project. Enjoy.
+This repository holds the code examples used for the [Agora Video SDK for Flutter](https://docs.agora.io/en/video-calling/overview/product-overview?platform=flutter) documentation. Clone the repo, run the samples, and use the code in your own projects. Enjoy.
 
 ## Sample projects
 
@@ -8,7 +8,9 @@ The runnable code examples are:
 
 - [SDK quickstart](./sdk_quickstart/) - The minimum code you need to integrate high-quality, low-latency Video 
   Calling features into your app using Video SDK.
-- [Call quality best practice](./call_quality/) - How to use Video SDK features to ensure optimal audio and video 
+- [Authentication workflow](./authentication_workflow/) - The minimum code you need to integrate high-quality, low-latency Video 
+  Calling features into your app using Video SDK.  
+- [Call quality best practice](./src/call_quality/) - How to use Video SDK features to ensure optimal audio and video 
   quality in your app. 
 
 
