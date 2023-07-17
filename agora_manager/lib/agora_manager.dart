@@ -118,13 +118,6 @@ class AgoraManager {
         eventArgs["reason"] = reason;
         eventCallback("onJoinChannelSuccess", eventArgs);
       },
-      onTokenPrivilegeWillExpire: (RtcConnection connection, String token) {
-        messageCallback('Token expiring...');
-        Map<String, dynamic> eventArgs = {};
-        eventArgs["connection"] = connection;
-        eventArgs["token"] = token;
-        eventCallback("onTokenPrivilegeWillExpire", eventArgs);
-      },
     );
   }
 
@@ -153,7 +146,6 @@ class AgoraManager {
     uid = (uid == -1) ? config['uid'] : uid;
 
     await agoraEngine.startPreview();
-
     // Set channel options including the client role and channel profile
     ChannelMediaOptions options = ChannelMediaOptions(
       clientRoleType: clientRole,

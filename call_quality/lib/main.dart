@@ -1,5 +1,6 @@
 import 'dart:async';
 import 'package:authentication_workflow/agora_manager_authentication.dart';
+import 'package:call_quality/agora_manager_call_quality.dart';
 import 'package:flutter/material.dart';
 import 'package:agora_manager/agora_manager.dart';
 import 'package:agora_rtc_engine/agora_rtc_engine.dart';
@@ -14,25 +15,19 @@ class MyApp extends StatefulWidget {
 }
 
 class MyAppState extends State<MyApp> {
-  late AgoraManagerAuthentication agoraManager;
+  late AgoraManagerCallQuality agoraManager;
   bool isAgoraManagerInitialized = false;
   final GlobalKey<ScaffoldMessengerState> scaffoldMessengerKey =
-      GlobalKey<ScaffoldMessengerState>(); // Global key to access the scaffold
-  final channelTextController =
-      TextEditingController(text: ''); // To access the TextField
+  GlobalKey<ScaffoldMessengerState>(); // Global key to access the scaffold
+  bool isBroadcaster = true;
+
+  bool _isJoined() {
+    return isAgoraManagerInitialized ? agoraManager.isJoined : false;
+  }
 
   // Build UI
   @override
   Widget build(BuildContext context) {
-    if (!isAgoraManagerInitialized) {
-      return const Scaffold(
-        backgroundColor: Colors.white,
-        body: Center(
-            child: CircularProgressIndicator()
-        ),
-      );
-    }
-
     return MaterialApp(
       scaffoldMessengerKey: scaffoldMessengerKey,
       home: Scaffold(
@@ -65,8 +60,8 @@ class MyAppState extends State<MyApp> {
               SizedBox(
                 height: 40,
                 child: ElevatedButton(
-                  onPressed: agoraManager.isJoined ? () => {leave()} : () => {join()},
-                  child: Text(agoraManager.isJoined ? "Leave" : "Join"),
+                  onPressed: _isJoined() ? () => {leave()} : () => {join()},
+                  child: Text(_isJoined() ? "Leave" : "Join"),
                 ),
               ),
             ],
@@ -76,18 +71,19 @@ class MyAppState extends State<MyApp> {
 
   Widget _radioButtons() {
     // Radio Buttons
-    if (agoraManager.currentProduct == ProductName.interactiveLiveStreaming ||
-            agoraManager.currentProduct == ProductName.broadcastStreaming) {
+    if (isAgoraManagerInitialized &&
+        (agoraManager.currentProduct == ProductName.interactiveLiveStreaming ||
+            agoraManager.currentProduct == ProductName.broadcastStreaming)) {
       return Row(children: <Widget>[
         Radio<bool>(
           value: true,
-          groupValue: agoraManager.isBroadcaster,
+          groupValue: isBroadcaster,
           onChanged: (value) => _handleRadioValueChange(value),
         ),
         const Text('Host'),
         Radio<bool>(
           value: false,
-          groupValue: agoraManager.isBroadcaster,
+          groupValue: isBroadcaster,
           onChanged: (value) => _handleRadioValueChange(value),
         ),
         const Text('Audience'),
@@ -100,14 +96,15 @@ class MyAppState extends State<MyApp> {
   // Set the client role when a radio button is selected
   void _handleRadioValueChange(bool? value) async {
     setState(() {
-      agoraManager.isBroadcaster = (value == true);
+      isBroadcaster = (value == true);
+      agoraManager.isBroadcaster = isBroadcaster;
     });
     if (agoraManager.isJoined) leave();
   }
 
 // Display local video preview
   Widget _localPreview() {
-    if (agoraManager.isJoined && agoraManager.isBroadcaster) {
+    if (_isJoined() && isBroadcaster) {
       return agoraManager.localVideoView();
     } else {
       return const Text(
@@ -119,7 +116,7 @@ class MyAppState extends State<MyApp> {
 
 // Display remote user's video
   Widget _remoteVideo() {
-    if (agoraManager.remoteUid != null) {
+    if (isAgoraManagerInitialized && agoraManager.remoteUid != null) {
       try {
         return agoraManager.remoteVideoView();
       } catch (e) {
@@ -128,7 +125,7 @@ class MyAppState extends State<MyApp> {
       }
     } else {
       return Text(
-        agoraManager.isJoined ? 'Waiting for a remote user to join' : '',
+        _isJoined() ? 'Waiting for a remote user to join' : '',
         textAlign: TextAlign.center,
       );
     }
@@ -180,7 +177,7 @@ class MyAppState extends State<MyApp> {
     // Handle the event based on the event name and named arguments
     switch (eventName) {
       case 'onConnectionStateChanged':
-        // Connection state changed
+      // Connection state changed
         if (eventArgs["reason"] ==
             ConnectionChangedReasonType.connectionChangedLeaveChannel) {
           setState(() {});
