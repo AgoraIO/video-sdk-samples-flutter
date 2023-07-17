@@ -65,8 +65,7 @@ class AgoraManagerAuthentication extends AgoraManager {
       // Use the token to join a channel or renew an expiring token
       return newToken;
     } else {
-      // If the server did not return an OK response,
-      // then throw an exception.
+      // Throw an exception.
       throw Exception(
           'Failed to fetch a token. Make sure that your server URL is valid');
     }
@@ -76,6 +75,28 @@ class AgoraManagerAuthentication extends AgoraManager {
     String token = await fetchToken(config['uid'], config['channelName']);
     // Renew the token
     agoraEngine.renewToken(token);
-    messageCallback("Expiring token renewed");
+    messageCallback("Token renewed");
   }
+
+  @override
+  RtcEngineEventHandler getEventHandler() {
+    return RtcEngineEventHandler(
+      onTokenPrivilegeWillExpire: (RtcConnection connection, String token) {
+        renewToken()
+      },
+      onConnectionStateChanged: (RtcConnection connection, ConnectionStateType state, ConnectionChangedReasonType reason) {
+        super.getEventHandler().onConnectionStateChanged!(connection, state, reason);
+      },
+      onJoinChannelSuccess: (RtcConnection connection, int elapsed) {
+        super.getEventHandler().onJoinChannelSuccess!(connection, elapsed);
+      },
+      onUserJoined: (RtcConnection connection, int remoteUid, int elapsed) {
+        super.getEventHandler().onUserJoined!(connection, remoteUid, elapsed);
+      },
+      onUserOffline: (RtcConnection connection, int remoteUid, UserOfflineReasonType reason) {
+        super.getEventHandler().onUserOffline!(connection, remoteUid, reason);
+      },
+    );
+  }
+
 }

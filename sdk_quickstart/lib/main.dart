@@ -17,24 +17,24 @@ class MyAppState extends State<MyApp> {
   bool isAgoraManagerInitialized = false;
   final GlobalKey<ScaffoldMessengerState> scaffoldMessengerKey =
       GlobalKey<ScaffoldMessengerState>(); // Global key to access the scaffold
-  bool _isBroadcaster = true;
-
-  bool _isJoined() {
-    if (isAgoraManagerInitialized) {
-      return agoraManager.isJoined;
-    } else {
-      return false;
-    }
-  }
 
   // Build UI
   @override
   Widget build(BuildContext context) {
+    if (!isAgoraManagerInitialized) {
+      return const Scaffold(
+        backgroundColor: Colors.white,
+        body: Center(
+          child: CircularProgressIndicator()
+        ),
+      );
+    }
+
     return MaterialApp(
       scaffoldMessengerKey: scaffoldMessengerKey,
       home: Scaffold(
           appBar: AppBar(
-            title: const Text('Get started with Video Calling'),
+            title: const Text('Video SDK Quickstart'),
           ),
           body: ListView(
             padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 4),
@@ -57,8 +57,8 @@ class MyAppState extends State<MyApp> {
               SizedBox(
                 height: 40,
                 child: ElevatedButton(
-                  onPressed: _isJoined() ? () => {leave()} : () => {join()},
-                  child: Text(_isJoined() ? "Leave" : "Join"),
+                  onPressed: agoraManager.isJoined ? () => {leave()} : () => {join()},
+                  child: Text(agoraManager.isJoined ? "Leave" : "Join"),
                 ),
               ),
             ],
@@ -68,19 +68,18 @@ class MyAppState extends State<MyApp> {
 
   Widget _radioButtons() {
     // Radio Buttons
-    if (isAgoraManagerInitialized &&
-        (agoraManager.currentProduct == ProductName.interactiveLiveStreaming ||
-            agoraManager.currentProduct == ProductName.broadcastStreaming)) {
+    if (agoraManager.currentProduct == ProductName.interactiveLiveStreaming ||
+            agoraManager.currentProduct == ProductName.broadcastStreaming) {
       return Row(children: <Widget>[
         Radio<bool>(
           value: true,
-          groupValue: _isBroadcaster,
+          groupValue: agoraManager.isBroadcaster,
           onChanged: (value) => _handleRadioValueChange(value),
         ),
         const Text('Host'),
         Radio<bool>(
           value: false,
-          groupValue: _isBroadcaster,
+          groupValue: agoraManager.isBroadcaster,
           onChanged: (value) => _handleRadioValueChange(value),
         ),
         const Text('Audience'),
@@ -93,14 +92,14 @@ class MyAppState extends State<MyApp> {
   // Set the client role when a radio button is selected
   void _handleRadioValueChange(bool? value) async {
     setState(() {
-      _isBroadcaster = (value == true);
+      agoraManager.isBroadcaster = (value == true);
     });
     if (agoraManager.isJoined) leave();
   }
 
 // Display local video preview
   Widget _localPreview() {
-    if (_isJoined() && _isBroadcaster) {
+    if (agoraManager.isJoined && agoraManager.isBroadcaster) {
       return agoraManager.localVideoView();
     } else {
       return const Text(
@@ -112,7 +111,7 @@ class MyAppState extends State<MyApp> {
 
 // Display remote user's video
   Widget _remoteVideo() {
-    if (isAgoraManagerInitialized && agoraManager.remoteUid != null) {
+    if (agoraManager.remoteUid != null) {
       try {
         return agoraManager.remoteVideoView();
       } catch (e) {
@@ -121,7 +120,7 @@ class MyAppState extends State<MyApp> {
       }
     } else {
       return Text(
-        _isJoined() ? 'Waiting for a remote user to join' : '',
+        agoraManager.isJoined ? 'Waiting for a remote user to join' : '',
         textAlign: TextAlign.center,
       );
     }
@@ -129,8 +128,8 @@ class MyAppState extends State<MyApp> {
 
   @override
   void initState() {
-    super.initState();
     initialize();
+    super.initState();
   }
 
   Future<void> initialize() async {

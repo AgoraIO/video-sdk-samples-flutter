@@ -1,9 +1,9 @@
 {
     "uid": 100,
     "appId": "9d2498880e934632b38b0a68fa2f1622",
-    "channelName": "demoChannel",
-    "rtcToken": "<---- Your Authentication token ---->",
+    "channelName": "demo",
+    "rtcToken": "007eJxTYIjyKbn1tGeT7scdOzhfJk3Yw3T7QxMTY7hUxdRFoeUvN/9VYLBMMTKxtLCwMEi1NDYxMzZKMrZIMkg0s0hLNEozNDMySvqxOaUhkJHB7YUxAyMUgvgsDCmpufkMDACvQCCM",
     "proxyUrl": "<---- Your Proxy Server URL ---->",
-    "serverUrl": "https://agora-token-service-production-b75a.up.railway.app",
+    "serverUrl": "https://agora-token-service-production-b75a.up.railway.app/",
     "tokenExpiryTime": "60"
 }
