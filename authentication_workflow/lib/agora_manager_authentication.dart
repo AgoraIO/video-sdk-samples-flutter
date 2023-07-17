@@ -13,9 +13,7 @@ class AgoraManagerAuthentication extends AgoraManager {
           currentProduct: currentProduct,
           messageCallback: messageCallback,
           eventCallback: eventCallback,
-        ) {
-    // Additional initialization specific to AgoraManagerAuthentication
-  }
+        );
 
   static Future<AgoraManagerAuthentication> create({
     required ProductName currentProduct,
@@ -34,7 +32,9 @@ class AgoraManagerAuthentication extends AgoraManager {
   }
 
   Future<void> fetchTokenAndJoin(channelName) async {
+    // Retrieve a token from the server
     config['rtcToken'] = await fetchToken(config['uid'], channelName);
+    // Join a Video SDK channel
     return super.join(
         channelName: channelName,
         token: config['rtcToken'],
@@ -44,10 +44,8 @@ class AgoraManagerAuthentication extends AgoraManager {
   }
 
   Future<String> fetchToken(int uid, String channelName) async {
-    int tokenRole = isBroadcaster
-        ? 1
-        : 2; // use 1 for Host/Broadcaster, 2 for Subscriber/Audience
-
+    // Token role, use 1 for Host/Broadcaster, 2 for Subscriber/Audience
+    int tokenRole = isBroadcaster ? 1 : 2;
     // Prepare the Url
     String url =
         '${config['serverUrl']}/rtc/$channelName/${tokenRole.toString()}/uid/${uid.toString()}?expiry=${config['tokenExpiryTime'].toString()}';
@@ -72,6 +70,7 @@ class AgoraManagerAuthentication extends AgoraManager {
   }
 
   void renewToken() async {
+    // Retrieve a token from the server
     String token = await fetchToken(config['uid'], config['channelName']);
     // Renew the token
     agoraEngine.renewToken(token);
@@ -82,7 +81,13 @@ class AgoraManagerAuthentication extends AgoraManager {
   RtcEngineEventHandler getEventHandler() {
     return RtcEngineEventHandler(
       onTokenPrivilegeWillExpire: (RtcConnection connection, String token) {
-        renewToken()
+        messageCallback('Token expiring...');
+        renewToken();
+        // Notify the UI through the eventCallback
+        Map<String, dynamic> eventArgs = {};
+        eventArgs["connection"] = connection;
+        eventArgs["token"] = token;
+        eventCallback("onTokenPrivilegeWillExpire", eventArgs);
       },
       onConnectionStateChanged: (RtcConnection connection, ConnectionStateType state, ConnectionChangedReasonType reason) {
         super.getEventHandler().onConnectionStateChanged!(connection, state, reason);
@@ -97,6 +102,29 @@ class AgoraManagerAuthentication extends AgoraManager {
         super.getEventHandler().onUserOffline!(connection, remoteUid, reason);
       },
     );
+  }
+
+  Future<void> joinChannelWithToken([String? channelName]) async {
+    String token='';
+    channelName ??= config['channelName'];
+
+    if (isValidURL(config['serverUrl'])) { // A valid server url is available
+      // Retrieve a token from the server
+      token = await fetchToken(config['uid'], channelName!);
+    } else { // use the token from the config.json file
+      token = config['rtcToken'];
+    }
+
+    return join(
+        channelName: channelName!,
+        token: token,
+        clientRole: (isBroadcaster) ? ClientRoleType.clientRoleBroadcaster : ClientRoleType.clientRoleAudience
+    );
+  }
+
+  bool isValidURL(String urlString) {
+    Uri? uri = Uri.tryParse(urlString);
+    return uri != null && uri.isAbsolute;
   }
 
 }
