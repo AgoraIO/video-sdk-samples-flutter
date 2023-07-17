@@ -1,5 +1,4 @@
 import 'dart:async';
-import 'package:authentication_workflow/agora_manager_authentication.dart';
 import 'package:call_quality/agora_manager_call_quality.dart';
 import 'package:flutter/material.dart';
 import 'package:agora_manager/agora_manager.dart';
@@ -37,11 +36,6 @@ class MyAppState extends State<MyApp> {
           body: ListView(
             padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 4),
             children: [
-              TextField(
-                controller: channelTextController,
-                decoration: const InputDecoration(
-                    hintText: 'Type the channel name here'),
-              ),
               // Container for the local video
               Container(
                 height: 240,
@@ -139,7 +133,7 @@ class MyAppState extends State<MyApp> {
 
   Future<void> initialize() async {
     // Set up an instance of AgoraManager
-    agoraManager = await AgoraManagerAuthentication.create(
+    agoraManager = await AgoraManagerCallQuality.create(
       currentProduct: ProductName.videoCalling,
       messageCallback: showMessage,
       eventCallback: eventCallback,
@@ -152,14 +146,7 @@ class MyAppState extends State<MyApp> {
   }
 
   Future<void> join() async {
-    String channelName = channelTextController.text;
-    if (channelName.isEmpty) {
-      showMessage("Enter a channel name");
-      return;
-    } else {
-      showMessage("Fetching a token ...");
-    }
-    await agoraManager.fetchTokenAndJoin(channelName);
+    await agoraManager.joinChannelWithToken();
   }
 
   Future<void> leave() async {
