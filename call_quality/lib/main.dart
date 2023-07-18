@@ -7,12 +7,44 @@ import 'package:agora_rtc_engine/agora_rtc_engine.dart';
 void main() => runApp(const MaterialApp(home: MyApp()));
 
 class UiHelper {
-  void commonMethod1() {
-    // Implementation of common method 1
+  late AgoraManager _agoraManager;
+  void initializeUiHelper (AgoraManager agoraManager) {
+    _agoraManager = agoraManager;
   }
 
-  void commonMethod2() {
-    // Implementation of common method 2
+  Widget _radioButtons() {
+    // Radio Buttons
+    if (_agoraManager.currentProduct == ProductName.interactiveLiveStreaming ||
+        _agoraManager.currentProduct == ProductName.broadcastStreaming) {
+      return Row(children: <Widget>[
+        Radio<bool>(
+          value: true,
+          groupValue: _agoraManager.isBroadcaster,
+          onChanged: (value) => _handleRadioValueChange(value),
+        ),
+        const Text('Host'),
+        Radio<bool>(
+          value: false,
+          groupValue: _agoraManager.isBroadcaster,
+          onChanged: (value) => _handleRadioValueChange(value),
+        ),
+        const Text('Audience'),
+      ]);
+    } else {
+      return Container();
+    }
+  }
+
+  // Set the client role when a radio button is selected
+  void _handleRadioValueChange(bool? value) async {
+    //setState(() {
+      _agoraManager.isBroadcaster = (value == true);
+    //});
+    if (_agoraManager.isJoined) leave();
+  }
+
+  Future<void> leave() async {
+    await _agoraManager.leave();
   }
 }
 
@@ -118,37 +150,6 @@ class MyAppState extends State<MyApp> with UiHelper {
     ]);
   }
 
-  Widget _radioButtons() {
-    // Radio Buttons
-    if (agoraManager.currentProduct == ProductName.interactiveLiveStreaming ||
-        agoraManager.currentProduct == ProductName.broadcastStreaming) {
-      return Row(children: <Widget>[
-        Radio<bool>(
-          value: true,
-          groupValue: agoraManager.isBroadcaster,
-          onChanged: (value) => _handleRadioValueChange(value),
-        ),
-        const Text('Host'),
-        Radio<bool>(
-          value: false,
-          groupValue: agoraManager.isBroadcaster,
-          onChanged: (value) => _handleRadioValueChange(value),
-        ),
-        const Text('Audience'),
-      ]);
-    } else {
-      return Container();
-    }
-  }
-
-  // Set the client role when a radio button is selected
-  void _handleRadioValueChange(bool? value) async {
-    setState(() {
-      agoraManager.isBroadcaster = (value == true);
-    });
-    if (agoraManager.isJoined) leave();
-  }
-
 // Display local video preview
   Widget _localPreview() {
     if (agoraManager.isBroadcaster) {
@@ -169,8 +170,8 @@ class MyAppState extends State<MyApp> with UiHelper {
           children: [
             agoraManager.remoteVideoView(),
             Positioned(
-              top: 20,
-              left: 20,
+              bottom: 10,
+              left: 10,
               child: Align(
                 alignment: Alignment.bottomLeft,
                 child: Text(
@@ -202,23 +203,20 @@ class MyAppState extends State<MyApp> with UiHelper {
   Future<void> initialize() async {
     // Set up an instance of AgoraManager
     agoraManager = await AgoraManagerCallQuality.create(
-      currentProduct: ProductName.videoCalling,
+      currentProduct: ProductName.interactiveLiveStreaming,
       messageCallback: showMessage,
       eventCallback: eventCallback,
     );
     await agoraManager.setupVideoSDKEngine();
 
     setState(() {
+      initializeUiHelper(agoraManager);
       isAgoraManagerInitialized = true;
     });
   }
 
   Future<void> join() async {
     await agoraManager.joinChannelWithToken();
-  }
-
-  Future<void> leave() async {
-    await agoraManager.leave();
   }
 
   // Release the resources when you leave
