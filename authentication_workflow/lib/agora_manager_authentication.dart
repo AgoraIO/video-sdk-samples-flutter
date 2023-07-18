@@ -33,7 +33,14 @@ class AgoraManagerAuthentication extends AgoraManager {
 
   Future<void> fetchTokenAndJoin(channelName) async {
     // Retrieve a token from the server
-    config['rtcToken'] = await fetchToken(config['uid'], channelName);
+    try {
+      config['rtcToken'] = await fetchToken(config['uid'], channelName);
+      // Proceed with token usage or further operations
+    } catch (e) {
+      // Handle the exception or display an error message
+      messageCallback('Error fetching token');
+      return;
+    }
     // Join a Video SDK channel
     return super.join(
         channelName: channelName,
@@ -71,7 +78,15 @@ class AgoraManagerAuthentication extends AgoraManager {
 
   void renewToken() async {
     // Retrieve a token from the server
-    String token = await fetchToken(config['uid'], config['channelName']);
+    try {
+      String token = await fetchToken(config['uid'], config['channelName']);
+      // Proceed with token usage or further operations
+    } catch (e) {
+      // Handle the exception or display an error message
+      messageCallback('Error fetching token: $e');
+      return;
+    }
+
     // Renew the token
     agoraEngine.renewToken(token);
     messageCallback("Token renewed");

@@ -5,6 +5,15 @@ import 'package:agora_manager/agora_manager.dart';
 import 'package:agora_rtc_engine/agora_rtc_engine.dart';
 
 void main() => runApp(const MaterialApp(home: MyApp()));
+class UiHelper {
+  void commonMethod1() {
+    // Implementation of common method 1
+  }
+
+  void commonMethod2() {
+    // Implementation of common method 2
+  }
+}
 
 class MyApp extends StatefulWidget {
   const MyApp({Key? key}) : super(key: key);
@@ -13,29 +22,41 @@ class MyApp extends StatefulWidget {
   MyAppState createState() => MyAppState();
 }
 
-class MyAppState extends State<MyApp> {
+class MyAppState extends State<MyApp> with UiHelper {
   late AgoraManagerCallQuality agoraManager;
   bool isAgoraManagerInitialized = false;
   final GlobalKey<ScaffoldMessengerState> scaffoldMessengerKey =
   GlobalKey<ScaffoldMessengerState>(); // Global key to access the scaffold
-  bool isBroadcaster = true;
-
-  bool _isJoined() {
-    return isAgoraManagerInitialized ? agoraManager.isJoined : false;
-  }
+  bool isHighQuality = true; // Quality of the remote video stream being played
 
   // Build UI
   @override
   Widget build(BuildContext context) {
+    if (!isAgoraManagerInitialized) {
+      return const Scaffold(
+        backgroundColor: Colors.white,
+        body: Center(
+            child: CircularProgressIndicator()
+        ),
+      );
+    }
+
     return MaterialApp(
       scaffoldMessengerKey: scaffoldMessengerKey,
       home: Scaffold(
           appBar: AppBar(
-            title: const Text('Get started with Video Calling'),
+            title: const Text('Call quality'),
           ),
           body: ListView(
             padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 4),
             children: [
+              _networkStatus(),
+              const SizedBox(height: 8),
+              ElevatedButton(
+                child: isHighQuality ? const Text("Switch to low quality")
+                    : const Text("Switch to high quality"),
+                onPressed: () => {changeVideoQuality()},
+              ),
               // Container for the local video
               Container(
                 height: 240,
@@ -54,8 +75,8 @@ class MyAppState extends State<MyApp> {
               SizedBox(
                 height: 40,
                 child: ElevatedButton(
-                  onPressed: _isJoined() ? () => {leave()} : () => {join()},
-                  child: Text(_isJoined() ? "Leave" : "Join"),
+                  onPressed: agoraManager.isJoined ? () => {leave()} : () => {join()},
+                  child: Text(agoraManager.isJoined ? "Leave" : "Join"),
                 ),
               ),
             ],
@@ -63,21 +84,52 @@ class MyAppState extends State<MyApp> {
     );
   }
 
+  void changeVideoQuality(){
+    if (agoraManager.remoteUid == null) return;
+    agoraManager.setVideoQuality(!isHighQuality);
+
+    setState(() {
+      isHighQuality = !isHighQuality;
+    });
+  }
+
+  Widget _networkStatus() {
+    Color statusColor;
+    if (agoraManager.networkQuality > 0 && agoraManager.networkQuality < 3) {
+      statusColor = Colors.green;
+    } else if (agoraManager.networkQuality <= 4) {
+      statusColor = Colors.yellow;
+    } else if (agoraManager.networkQuality <= 6) {
+      statusColor = Colors.red;
+    } else {
+      statusColor = Colors.grey;
+    }
+
+    return Row(mainAxisAlignment: MainAxisAlignment.end, children: <Widget>[
+      const Text("Network status: "),
+      CircleAvatar(
+        foregroundColor: Colors.black,
+        backgroundColor: statusColor,
+        radius: 10,
+        child: Text(agoraManager.networkQuality.toString()),
+      )
+    ]);
+  }
+
   Widget _radioButtons() {
     // Radio Buttons
-    if (isAgoraManagerInitialized &&
-        (agoraManager.currentProduct == ProductName.interactiveLiveStreaming ||
-            agoraManager.currentProduct == ProductName.broadcastStreaming)) {
+    if (agoraManager.currentProduct == ProductName.interactiveLiveStreaming ||
+            agoraManager.currentProduct == ProductName.broadcastStreaming) {
       return Row(children: <Widget>[
         Radio<bool>(
           value: true,
-          groupValue: isBroadcaster,
+          groupValue: agoraManager.isBroadcaster,
           onChanged: (value) => _handleRadioValueChange(value),
         ),
         const Text('Host'),
         Radio<bool>(
           value: false,
-          groupValue: isBroadcaster,
+          groupValue: agoraManager.isBroadcaster,
           onChanged: (value) => _handleRadioValueChange(value),
         ),
         const Text('Audience'),
@@ -90,15 +142,14 @@ class MyAppState extends State<MyApp> {
   // Set the client role when a radio button is selected
   void _handleRadioValueChange(bool? value) async {
     setState(() {
-      isBroadcaster = (value == true);
-      agoraManager.isBroadcaster = isBroadcaster;
+      agoraManager.isBroadcaster = (value == true);
     });
     if (agoraManager.isJoined) leave();
   }
 
 // Display local video preview
   Widget _localPreview() {
-    if (_isJoined() && isBroadcaster) {
+    if (agoraManager.isBroadcaster) {
       return agoraManager.localVideoView();
     } else {
       return const Text(
@@ -110,7 +161,7 @@ class MyAppState extends State<MyApp> {
 
 // Display remote user's video
   Widget _remoteVideo() {
-    if (isAgoraManagerInitialized && agoraManager.remoteUid != null) {
+    if (agoraManager.remoteUid != null) {
       try {
         return agoraManager.remoteVideoView();
       } catch (e) {
@@ -119,7 +170,7 @@ class MyAppState extends State<MyApp> {
       }
     } else {
       return Text(
-        _isJoined() ? 'Waiting for a remote user to join' : '',
+        agoraManager.isJoined ? 'Waiting for a remote user to join' : '',
         textAlign: TextAlign.center,
       );
     }
@@ -180,6 +231,11 @@ class MyAppState extends State<MyApp> {
         break;
 
       case 'onUserOffline':
+        setState(() {});
+        break;
+
+      case 'onLastmileQuality':
+      case 'onNetworkQuality':
         setState(() {});
         break;
     }

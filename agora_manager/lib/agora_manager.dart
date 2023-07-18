@@ -122,10 +122,10 @@ class AgoraManager {
   }
 
   Future<void> setupVideoSDKEngine() async {
-    // retrieve or request camera and microphone permissions
+    // Retrieve or request camera and microphone permissions
     await [Permission.microphone, Permission.camera].request();
 
-    //create an instance of the Agora engine
+    // Create an instance of the Agora engine
     agoraEngine = createAgoraRtcEngine();
     await agoraEngine.initialize(RtcEngineContext(appId: config['appId']));
 
