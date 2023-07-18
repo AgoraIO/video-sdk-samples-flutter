@@ -5,6 +5,7 @@ import 'package:agora_manager/agora_manager.dart';
 import 'package:agora_rtc_engine/agora_rtc_engine.dart';
 
 void main() => runApp(const MaterialApp(home: MyApp()));
+
 class UiHelper {
   void commonMethod1() {
     // Implementation of common method 1
@@ -26,8 +27,9 @@ class MyAppState extends State<MyApp> with UiHelper {
   late AgoraManagerCallQuality agoraManager;
   bool isAgoraManagerInitialized = false;
   final GlobalKey<ScaffoldMessengerState> scaffoldMessengerKey =
-  GlobalKey<ScaffoldMessengerState>(); // Global key to access the scaffold
+      GlobalKey<ScaffoldMessengerState>(); // Global key to access the scaffold
   bool isHighQuality = true; // Quality of the remote video stream being played
+  String videoCaption = "";
 
   // Build UI
   @override
@@ -35,9 +37,7 @@ class MyAppState extends State<MyApp> with UiHelper {
     if (!isAgoraManagerInitialized) {
       return const Scaffold(
         backgroundColor: Colors.white,
-        body: Center(
-            child: CircularProgressIndicator()
-        ),
+        body: Center(child: CircularProgressIndicator()),
       );
     }
 
@@ -53,7 +53,8 @@ class MyAppState extends State<MyApp> with UiHelper {
               _networkStatus(),
               const SizedBox(height: 8),
               ElevatedButton(
-                child: isHighQuality ? const Text("Switch to low quality")
+                child: isHighQuality
+                    ? const Text("Switch to low quality")
                     : const Text("Switch to high quality"),
                 onPressed: () => {changeVideoQuality()},
               ),
@@ -75,7 +76,8 @@ class MyAppState extends State<MyApp> with UiHelper {
               SizedBox(
                 height: 40,
                 child: ElevatedButton(
-                  onPressed: agoraManager.isJoined ? () => {leave()} : () => {join()},
+                  onPressed:
+                      agoraManager.isJoined ? () => {leave()} : () => {join()},
                   child: Text(agoraManager.isJoined ? "Leave" : "Join"),
                 ),
               ),
@@ -84,7 +86,7 @@ class MyAppState extends State<MyApp> with UiHelper {
     );
   }
 
-  void changeVideoQuality(){
+  void changeVideoQuality() {
     if (agoraManager.remoteUid == null) return;
     agoraManager.setVideoQuality(!isHighQuality);
 
@@ -119,7 +121,7 @@ class MyAppState extends State<MyApp> with UiHelper {
   Widget _radioButtons() {
     // Radio Buttons
     if (agoraManager.currentProduct == ProductName.interactiveLiveStreaming ||
-            agoraManager.currentProduct == ProductName.broadcastStreaming) {
+        agoraManager.currentProduct == ProductName.broadcastStreaming) {
       return Row(children: <Widget>[
         Radio<bool>(
           value: true,
@@ -163,7 +165,22 @@ class MyAppState extends State<MyApp> with UiHelper {
   Widget _remoteVideo() {
     if (agoraManager.remoteUid != null) {
       try {
-        return agoraManager.remoteVideoView();
+        return Stack(
+          children: [
+            agoraManager.remoteVideoView(),
+            Positioned(
+              top: 20,
+              left: 20,
+              child: Align(
+                alignment: Alignment.bottomLeft,
+                child: Text(
+                  videoCaption,
+                  style: const TextStyle(color: Colors.white),
+                ),
+              ),
+            ),
+          ],
+        );
       } catch (e) {
         showMessage("error!");
         return const Text('error');
@@ -215,11 +232,25 @@ class MyAppState extends State<MyApp> with UiHelper {
     // Handle the event based on the event name and named arguments
     switch (eventName) {
       case 'onConnectionStateChanged':
-      // Connection state changed
+        // Connection state changed
         if (eventArgs["reason"] ==
             ConnectionChangedReasonType.connectionChangedLeaveChannel) {
           setState(() {});
         }
+        break;
+
+      case 'onRemoteVideoStats':
+        RemoteVideoStats stats = eventArgs["stats"];
+        if (stats.uid == agoraManager.remoteUid) {
+          setState(() {
+            videoCaption = agoraManager.qualityStatsSummary;
+          });
+        }
+        break;
+
+      case 'onLastmileQuality':
+      case 'onNetworkQuality':
+        setState(() {});
         break;
 
       case 'onJoinChannelSuccess':
@@ -231,11 +262,6 @@ class MyAppState extends State<MyApp> with UiHelper {
         break;
 
       case 'onUserOffline':
-        setState(() {});
-        break;
-
-      case 'onLastmileQuality':
-      case 'onNetworkQuality':
         setState(() {});
         break;
     }

@@ -5,8 +5,8 @@ import 'package:permission_handler/permission_handler.dart';
 
 class AgoraManagerCallQuality extends AgoraManagerAuthentication {
   int networkQuality = 0; // Quality index of the network connection
-  int counter1 = 0; // Controls the frequency of notifications
-  int counter2 = 0; // Controls the frequency of notifications
+  int counter = 0; // Controls the frequency of notifications
+  String qualityStatsSummary = "";
 
   AgoraManagerCallQuality({
     required ProductName currentProduct,
@@ -121,14 +121,14 @@ class AgoraManagerCallQuality extends AgoraManagerAuthentication {
         eventCallback("onNetworkQuality", eventArgs);
       },
       onRtcStats: (RtcConnection connection, RtcStats stats) {
-        counter1 += 1;
+        counter += 1;
         String msg = "";
 
-        if (counter1 == 5) {
+        if (counter == 5) {
           msg = "${stats.userCount} user(s)";
-        } else if (counter1 == 10) {
+        } else if (counter == 10) {
           msg = "Packet loss rate: ${stats.rxPacketLossRate}";
-          counter1 = 0;
+          counter = 0;
         }
         if (msg.isNotEmpty) messageCallback(msg);
       },
@@ -142,14 +142,16 @@ class AgoraManagerCallQuality extends AgoraManagerAuthentication {
         messageCallback(msg);
       },
       onRemoteVideoStats: (RtcConnection connection, RemoteVideoStats stats) {
-        counter2 += 1;
-        if (counter2 == 5) {
-          String msg = "Remote Video Stats:\n User id: ${stats.uid}"
-              "\n Received bitrate: ${stats.receivedBitrate}"
-              "\n Total frozen time: ${stats.totalFrozenTime}";
-          counter2 = 0;
-          messageCallback(msg);
-        }
+        qualityStatsSummary =
+        "Renderer frame rate: ${stats.rendererOutputFrameRate}"
+            "\nReceived bitrate: ${stats.receivedBitrate}"
+            "\nPublish duration: ${stats.publishDuration}"
+            "\nFrame loss rate: ${stats.frameLossRate}";
+
+        Map<String, dynamic> eventArgs = {};
+        eventArgs["connection"] = connection;
+        eventArgs["stats"] = stats;
+        eventCallback("onRemoteVideoStats", eventArgs);
       },
       onTokenPrivilegeWillExpire: (RtcConnection connection, String token) {
         super.getEventHandler().onTokenPrivilegeWillExpire!(connection, token);

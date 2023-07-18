@@ -78,12 +78,13 @@ class AgoraManagerAuthentication extends AgoraManager {
 
   void renewToken() async {
     // Retrieve a token from the server
+    String token;
     try {
-      String token = await fetchToken(config['uid'], config['channelName']);
+      token = await fetchToken(config['uid'], config['channelName']);
       // Proceed with token usage or further operations
     } catch (e) {
       // Handle the exception or display an error message
-      messageCallback('Error fetching token: $e');
+      messageCallback('Error fetching token');
       return;
     }
 
