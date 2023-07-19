@@ -2,51 +2,10 @@ import 'dart:async';
 import 'package:call_quality/agora_manager_call_quality.dart';
 import 'package:flutter/material.dart';
 import 'package:agora_manager/agora_manager.dart';
+import 'package:agora_manager/ui_helper.dart';
 import 'package:agora_rtc_engine/agora_rtc_engine.dart';
 
 void main() => runApp(const MaterialApp(home: MyApp()));
-
-class UiHelper {
-  late AgoraManager _agoraManager;
-  void initializeUiHelper (AgoraManager agoraManager) {
-    _agoraManager = agoraManager;
-  }
-
-  Widget _radioButtons() {
-    // Radio Buttons
-    if (_agoraManager.currentProduct == ProductName.interactiveLiveStreaming ||
-        _agoraManager.currentProduct == ProductName.broadcastStreaming) {
-      return Row(children: <Widget>[
-        Radio<bool>(
-          value: true,
-          groupValue: _agoraManager.isBroadcaster,
-          onChanged: (value) => _handleRadioValueChange(value),
-        ),
-        const Text('Host'),
-        Radio<bool>(
-          value: false,
-          groupValue: _agoraManager.isBroadcaster,
-          onChanged: (value) => _handleRadioValueChange(value),
-        ),
-        const Text('Audience'),
-      ]);
-    } else {
-      return Container();
-    }
-  }
-
-  // Set the client role when a radio button is selected
-  void _handleRadioValueChange(bool? value) async {
-    //setState(() {
-      _agoraManager.isBroadcaster = (value == true);
-    //});
-    if (_agoraManager.isJoined) leave();
-  }
-
-  Future<void> leave() async {
-    await _agoraManager.leave();
-  }
-}
 
 class MyApp extends StatefulWidget {
   const MyApp({Key? key}) : super(key: key);
@@ -90,21 +49,10 @@ class MyAppState extends State<MyApp> with UiHelper {
                     : const Text("Switch to high quality"),
                 onPressed: () => {changeVideoQuality()},
               ),
-              // Container for the local video
-              Container(
-                height: 240,
-                decoration: BoxDecoration(border: Border.all()),
-                child: Center(child: _localPreview()),
-              ),
-              const SizedBox(height: 10),
-              //Container for the Remote video
-              Container(
-                height: 240,
-                decoration: BoxDecoration(border: Border.all()),
-                child: Center(child: _remoteVideo()),
-              ),
-              _radioButtons(),
-              const SizedBox(height: 10),
+              localPreview(), // Widget for local video
+              remoteVideo(), // Widget for Remote video
+              radioButtons(), // Choose host or audience
+              const SizedBox(height: 5),
               SizedBox(
                 height: 40,
                 child: ElevatedButton(
@@ -210,7 +158,7 @@ class MyAppState extends State<MyApp> with UiHelper {
     await agoraManager.setupVideoSDKEngine();
 
     setState(() {
-      initializeUiHelper(agoraManager);
+      initializeUiHelper(agoraManager, setStateCallback);
       isAgoraManagerInitialized = true;
     });
   }
@@ -269,5 +217,9 @@ class MyAppState extends State<MyApp> with UiHelper {
     scaffoldMessengerKey.currentState?.showSnackBar(SnackBar(
       content: Text(message),
     ));
+  }
+
+  void setStateCallback() {
+    setState(() {});
   }
 }

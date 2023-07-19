@@ -1,6 +1,7 @@
 import 'dart:async';
 import 'package:flutter/material.dart';
 import 'package:agora_manager/agora_manager.dart';
+import 'package:agora_manager/ui_helper.dart';
 import 'package:agora_rtc_engine/agora_rtc_engine.dart';
 
 void main() => runApp(const MaterialApp(home: MyApp()));
@@ -12,7 +13,7 @@ class MyApp extends StatefulWidget {
   MyAppState createState() => MyAppState();
 }
 
-class MyAppState extends State<MyApp> {
+class MyAppState extends State<MyApp> with UiHelper {
   late AgoraManager agoraManager;
   bool isAgoraManagerInitialized = false;
   final GlobalKey<ScaffoldMessengerState> scaffoldMessengerKey =
@@ -24,9 +25,7 @@ class MyAppState extends State<MyApp> {
     if (!isAgoraManagerInitialized) {
       return const Scaffold(
         backgroundColor: Colors.white,
-        body: Center(
-          child: CircularProgressIndicator()
-        ),
+        body: Center(child: CircularProgressIndicator()),
       );
     }
 
@@ -39,91 +38,21 @@ class MyAppState extends State<MyApp> {
           body: ListView(
             padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 4),
             children: [
-              // Container for the local video
-              Container(
-                height: 240,
-                decoration: BoxDecoration(border: Border.all()),
-                child: Center(child: _localPreview()),
-              ),
-              const SizedBox(height: 10),
-              //Container for the Remote video
-              Container(
-                height: 240,
-                decoration: BoxDecoration(border: Border.all()),
-                child: Center(child: _remoteVideo()),
-              ),
-              _radioButtons(),
-              const SizedBox(height: 10),
+              localPreview(), // Widget for local video
+              remoteVideo(), // Widget for Remote video
+              radioButtons(), // Choose host or audience
+              const SizedBox(height: 5),
               SizedBox(
                 height: 40,
                 child: ElevatedButton(
-                  onPressed: agoraManager.isJoined ? () => {leave()} : () => {join()},
+                  onPressed:
+                      agoraManager.isJoined ? () => {leave()} : () => {join()},
                   child: Text(agoraManager.isJoined ? "Leave" : "Join"),
                 ),
               ),
             ],
           )),
     );
-  }
-
-  Widget _radioButtons() {
-    // Radio Buttons
-    if (agoraManager.currentProduct == ProductName.interactiveLiveStreaming ||
-            agoraManager.currentProduct == ProductName.broadcastStreaming) {
-      return Row(children: <Widget>[
-        Radio<bool>(
-          value: true,
-          groupValue: agoraManager.isBroadcaster,
-          onChanged: (value) => _handleRadioValueChange(value),
-        ),
-        const Text('Host'),
-        Radio<bool>(
-          value: false,
-          groupValue: agoraManager.isBroadcaster,
-          onChanged: (value) => _handleRadioValueChange(value),
-        ),
-        const Text('Audience'),
-      ]);
-    } else {
-      return Container();
-    }
-  }
-
-  // Set the client role when a radio button is selected
-  void _handleRadioValueChange(bool? value) async {
-    setState(() {
-      agoraManager.isBroadcaster = (value == true);
-    });
-    if (agoraManager.isJoined) leave();
-  }
-
-// Display local video preview
-  Widget _localPreview() {
-    if (agoraManager.isJoined && agoraManager.isBroadcaster) {
-      return agoraManager.localVideoView();
-    } else {
-      return const Text(
-        'Join a channel',
-        textAlign: TextAlign.center,
-      );
-    }
-  }
-
-// Display remote user's video
-  Widget _remoteVideo() {
-    if (agoraManager.remoteUid != null) {
-      try {
-        return agoraManager.remoteVideoView();
-      } catch (e) {
-        showMessage("error!");
-        return const Text('error');
-      }
-    } else {
-      return Text(
-        agoraManager.isJoined ? 'Waiting for a remote user to join' : '',
-        textAlign: TextAlign.center,
-      );
-    }
   }
 
   @override
@@ -135,23 +64,20 @@ class MyAppState extends State<MyApp> {
   Future<void> initialize() async {
     // Set up an instance of AgoraManager
     agoraManager = await AgoraManager.create(
-      currentProduct: ProductName.interactiveLiveStreaming,
+      currentProduct: ProductName.broadcastStreaming,
       messageCallback: showMessage,
       eventCallback: eventCallback,
     );
     await agoraManager.setupVideoSDKEngine();
 
     setState(() {
+      initializeUiHelper(agoraManager, setStateCallback);
       isAgoraManagerInitialized = true;
     });
   }
 
   Future<void> join() async {
     await agoraManager.join();
-  }
-
-  Future<void> leave() async {
-    await agoraManager.leave();
   }
 
   // Release the resources when you leave
@@ -195,5 +121,9 @@ class MyAppState extends State<MyApp> {
     scaffoldMessengerKey.currentState?.showSnackBar(SnackBar(
       content: Text(message),
     ));
+  }
+
+  void setStateCallback() {
+    setState(() {});
   }
 }
