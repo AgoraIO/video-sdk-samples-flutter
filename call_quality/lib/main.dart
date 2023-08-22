@@ -151,7 +151,7 @@ class MyAppState extends State<MyApp> with UiHelper {
   Future<void> initialize() async {
     // Set up an instance of AgoraManager
     agoraManager = await AgoraManagerCallQuality.create(
-      currentProduct: ProductName.interactiveLiveStreaming,
+      currentProduct: ProductName.videoCalling,
       messageCallback: showMessage,
       eventCallback: eventCallback,
     );
