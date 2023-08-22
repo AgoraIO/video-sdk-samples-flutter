@@ -4,6 +4,7 @@ import 'dart:convert';
 import 'package:flutter/services.dart';
 import 'package:agora_rtc_engine/agora_rtc_engine.dart';
 import 'package:permission_handler/permission_handler.dart';
+import 'package:flutter/material.dart';
 
 enum ProductName {
   videoCalling,
@@ -15,8 +16,6 @@ enum ProductName {
 class AgoraManager {
   late Map<String, dynamic> config;
   ProductName currentProduct = ProductName.videoCalling;
-  //String appId = "", token = "", channelName = "";
-  //int uid = 0;
   int? remoteUid; // uid of the remote user
   bool isJoined = false; // Indicates if the local user has joined the channel
   bool isBroadcaster = true; // Client role
@@ -30,12 +29,6 @@ class AgoraManager {
     required this.messageCallback,
     required this.eventCallback,
   });
-
-  /*AgoraManager._({
-    required this.currentProduct,
-    required this.messageCallback,
-    required this.eventCallback,
-  });*/
 
   static Future<AgoraManager> create({
     required ProductName currentProduct,
@@ -82,70 +75,64 @@ class AgoraManager {
     );
   }
 
+  RtcEngineEventHandler getEventHandler() {
+    return RtcEngineEventHandler(
+      onConnectionStateChanged: (RtcConnection connection,
+          ConnectionStateType state, ConnectionChangedReasonType reason) {
+        if (reason ==
+            ConnectionChangedReasonType.connectionChangedLeaveChannel) {
+          remoteUid = null;
+          isJoined = false;
+        }
+        Map<String, dynamic> eventArgs = {};
+        eventArgs["connection"] = connection;
+        eventArgs["state"] = state;
+        eventArgs["reason"] = reason;
+        eventCallback("onConnectionStateChanged", eventArgs);
+      },
+      onJoinChannelSuccess: (RtcConnection connection, int elapsed) {
+        isJoined = true;
+        messageCallback(
+            "Local user uid:${connection.localUid} joined the channel");
+        Map<String, dynamic> eventArgs = {};
+        eventArgs["connection"] = connection;
+        eventArgs["elapsed"] = elapsed;
+        eventCallback("onJoinChannelSuccess", eventArgs);
+      },
+      onUserJoined: (RtcConnection connection, int remoteUid, int elapsed) {
+        this.remoteUid = remoteUid;
+        messageCallback("Remote user uid:$remoteUid joined the channel");
+        Map<String, dynamic> eventArgs = {};
+        eventArgs["connection"] = connection;
+        eventArgs["remoteUid"] = remoteUid;
+        eventArgs["elapsed"] = elapsed;
+        eventCallback("onUserJoined", eventArgs);
+      },
+      onUserOffline: (RtcConnection connection, int remoteUid,
+          UserOfflineReasonType reason) {
+        this.remoteUid = null;
+        messageCallback("Remote user uid:$remoteUid left the channel");
+        Map<String, dynamic> eventArgs = {};
+        eventArgs["connection"] = connection;
+        eventArgs["remoteUid"] = remoteUid;
+        eventArgs["reason"] = reason;
+        eventCallback("onJoinChannelSuccess", eventArgs);
+      },
+    );
+  }
+
   Future<void> setupVideoSDKEngine() async {
-    // retrieve or request camera and microphone permissions
+    // Retrieve or request camera and microphone permissions
     await [Permission.microphone, Permission.camera].request();
 
-    //create an instance of the Agora engine
+    // Create an instance of the Agora engine
     agoraEngine = createAgoraRtcEngine();
     await agoraEngine.initialize(RtcEngineContext(appId: config['appId']));
 
     await agoraEngine.enableVideo();
 
     // Register the event handler
-    agoraEngine.registerEventHandler(
-      RtcEngineEventHandler(
-        onConnectionStateChanged: (RtcConnection connection,
-            ConnectionStateType state, ConnectionChangedReasonType reason) {
-          //messageCallback('Connection state: ${state}, reason: ${reason}');
-          if (reason ==
-              ConnectionChangedReasonType.connectionChangedLeaveChannel) {
-            remoteUid = null;
-            isJoined = false;
-          }
-          Map<String, dynamic> eventArgs = {};
-          eventArgs["connection"] = connection;
-          eventArgs["state"] = state;
-          eventArgs["reason"] = reason;
-          eventCallback("onConnectionStateChanged", eventArgs);
-        },
-        onJoinChannelSuccess: (RtcConnection connection, int elapsed) {
-          isJoined = true;
-          messageCallback(
-              "Local user uid:${connection.localUid} joined the channel");
-          Map<String, dynamic> eventArgs = {};
-          eventArgs["connection"] = connection;
-          eventArgs["elapsed"] = elapsed;
-          eventCallback("onJoinChannelSuccess", eventArgs);
-        },
-        onUserJoined: (RtcConnection connection, int remoteUid, int elapsed) {
-          this.remoteUid = remoteUid;
-          messageCallback("Remote user uid:$remoteUid joined the channel");
-          Map<String, dynamic> eventArgs = {};
-          eventArgs["connection"] = connection;
-          eventArgs["remoteUid"] = remoteUid;
-          eventArgs["elapsed"] = elapsed;
-          eventCallback("onUserJoined", eventArgs);
-        },
-        onUserOffline: (RtcConnection connection, int remoteUid,
-            UserOfflineReasonType reason) {
-          this.remoteUid = null;
-          messageCallback("Remote user uid:$remoteUid left the channel");
-          Map<String, dynamic> eventArgs = {};
-          eventArgs["connection"] = connection;
-          eventArgs["remoteUid"] = remoteUid;
-          eventArgs["reason"] = reason;
-          eventCallback("onJoinChannelSuccess", eventArgs);
-        },
-        onTokenPrivilegeWillExpire: (RtcConnection connection, String token) {
-          messageCallback('Token expiring...');
-          Map<String, dynamic> eventArgs = {};
-          eventArgs["connection"] = connection;
-          eventArgs["token"] = token;
-          eventCallback("onTokenPrivilegeWillExpire", eventArgs);
-        },
-      ),
-    );
+    agoraEngine.registerEventHandler(getEventHandler());
   }
 
   Future<void> join({
@@ -159,7 +146,6 @@ class AgoraManager {
     uid = (uid == -1) ? config['uid'] : uid;
 
     await agoraEngine.startPreview();
-
     // Set channel options including the client role and channel profile
     ChannelMediaOptions options = ChannelMediaOptions(
       clientRoleType: clientRole,

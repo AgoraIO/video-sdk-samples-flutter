@@ -1,7 +1,8 @@
 import 'dart:async';
-import 'package:authentication_workflow/signaling_manager_authentication.dart';
+import 'package:authentication_workflow/agora_manager_authentication.dart';
 import 'package:flutter/material.dart';
 import 'package:agora_manager/agora_manager.dart';
+import 'package:agora_manager/ui_helper.dart';
 import 'package:agora_rtc_engine/agora_rtc_engine.dart';
 
 void main() => runApp(const MaterialApp(home: MyApp()));
@@ -13,27 +14,29 @@ class MyApp extends StatefulWidget {
   MyAppState createState() => MyAppState();
 }
 
-class MyAppState extends State<MyApp> {
+class MyAppState extends State<MyApp> with UiHelper {
   late AgoraManagerAuthentication agoraManager;
   bool isAgoraManagerInitialized = false;
   final GlobalKey<ScaffoldMessengerState> scaffoldMessengerKey =
       GlobalKey<ScaffoldMessengerState>(); // Global key to access the scaffold
   final channelTextController =
       TextEditingController(text: ''); // To access the TextField
-  bool isBroadcaster = true;
-
-  bool _isJoined() {
-    return isAgoraManagerInitialized ? agoraManager.isJoined : false;
-  }
 
   // Build UI
   @override
   Widget build(BuildContext context) {
+    if (!isAgoraManagerInitialized) {
+      return const Scaffold(
+        backgroundColor: Colors.white,
+        body: Center(child: CircularProgressIndicator()),
+      );
+    }
+
     return MaterialApp(
       scaffoldMessengerKey: scaffoldMessengerKey,
       home: Scaffold(
           appBar: AppBar(
-            title: const Text('Get started with Video Calling'),
+            title: const Text('Authentication workflow'),
           ),
           body: ListView(
             padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 4),
@@ -43,26 +46,16 @@ class MyAppState extends State<MyApp> {
                 decoration: const InputDecoration(
                     hintText: 'Type the channel name here'),
               ),
-              // Container for the local video
-              Container(
-                height: 240,
-                decoration: BoxDecoration(border: Border.all()),
-                child: Center(child: _localPreview()),
-              ),
-              const SizedBox(height: 10),
-              //Container for the Remote video
-              Container(
-                height: 240,
-                decoration: BoxDecoration(border: Border.all()),
-                child: Center(child: _remoteVideo()),
-              ),
-              _radioButtons(),
-              const SizedBox(height: 10),
+              localPreview(), // Widget for local video
+              remoteVideo(), // Widget for Remote video
+              radioButtons(), // Choose host or audience
+              const SizedBox(height: 5),
               SizedBox(
                 height: 40,
                 child: ElevatedButton(
-                  onPressed: _isJoined() ? () => {leave()} : () => {join()},
-                  child: Text(_isJoined() ? "Leave" : "Join"),
+                  onPressed:
+                      agoraManager.isJoined ? () => {leave()} : () => {join()},
+                  child: Text(agoraManager.isJoined ? "Leave" : "Join"),
                 ),
               ),
             ],
@@ -72,23 +65,24 @@ class MyAppState extends State<MyApp> {
 
   Widget _radioButtons() {
     // Radio Buttons
-    if (isAgoraManagerInitialized &&
-        (agoraManager.currentProduct == ProductName.interactiveLiveStreaming ||
-            agoraManager.currentProduct == ProductName.broadcastStreaming)) {
-      return Row(children: <Widget>[
-        Radio<bool>(
-          value: true,
-          groupValue: isBroadcaster,
-          onChanged: (value) => _handleRadioValueChange(value),
-        ),
-        const Text('Host'),
-        Radio<bool>(
-          value: false,
-          groupValue: isBroadcaster,
-          onChanged: (value) => _handleRadioValueChange(value),
-        ),
-        const Text('Audience'),
-      ]);
+    if (agoraManager.currentProduct == ProductName.interactiveLiveStreaming ||
+        agoraManager.currentProduct == ProductName.broadcastStreaming) {
+      return Align(
+          alignment: Alignment.center,
+          child: Row(children: <Widget>[
+            Radio<bool>(
+              value: true,
+              groupValue: agoraManager.isBroadcaster,
+              onChanged: (value) => _handleRadioValueChange(value),
+            ),
+            const Text('Host'),
+            Radio<bool>(
+              value: false,
+              groupValue: agoraManager.isBroadcaster,
+              onChanged: (value) => _handleRadioValueChange(value),
+            ),
+            const Text('Audience'),
+          ]));
     } else {
       return Container();
     }
@@ -97,38 +91,59 @@ class MyAppState extends State<MyApp> {
   // Set the client role when a radio button is selected
   void _handleRadioValueChange(bool? value) async {
     setState(() {
-      isBroadcaster = (value == true);
-      agoraManager.isBroadcaster = isBroadcaster;
+      agoraManager.isBroadcaster = (value == true);
     });
     if (agoraManager.isJoined) leave();
   }
 
 // Display local video preview
   Widget _localPreview() {
-    if (_isJoined() && isBroadcaster) {
-      return agoraManager.localVideoView();
+    if (agoraManager.isJoined && agoraManager.isBroadcaster) {
+      return Container(
+          height: 240,
+          decoration: BoxDecoration(border: Border.all()),
+          margin: const EdgeInsets.only(bottom: 5),
+          child: Center(child: agoraManager.localVideoView()));
+    } else if (!agoraManager.isBroadcaster &&
+        (agoraManager.currentProduct == ProductName.interactiveLiveStreaming ||
+            agoraManager.currentProduct == ProductName.broadcastStreaming)) {
+      return Container();
     } else {
-      return const Text(
-        'Join a channel',
-        textAlign: TextAlign.center,
-      );
+      return Container(
+          height: 240,
+          decoration: BoxDecoration(border: Border.all()),
+          margin: const EdgeInsets.only(bottom: 16),
+          child: const Center(
+              child: Text('Join a channel', textAlign: TextAlign.center)));
     }
   }
 
 // Display remote user's video
   Widget _remoteVideo() {
-    if (isAgoraManagerInitialized && agoraManager.remoteUid != null) {
-      try {
-        return agoraManager.remoteVideoView();
-      } catch (e) {
-        showMessage("error!");
-        return const Text('error');
-      }
-    } else {
-      return Text(
-        _isJoined() ? 'Waiting for a remote user to join' : '',
-        textAlign: TextAlign.center,
+    if (agoraManager.isBroadcaster &&
+        (agoraManager.currentProduct == ProductName.interactiveLiveStreaming ||
+            agoraManager.currentProduct == ProductName.broadcastStreaming)) {
+      return Container();
+    }
+
+    if (agoraManager.remoteUid != null) {
+      return Container(
+        height: 240,
+        decoration: BoxDecoration(border: Border.all()),
+        margin: const EdgeInsets.only(bottom: 5),
+        child: Center(child: agoraManager.remoteVideoView()),
       );
+    } else {
+      return Container(
+          height: 240,
+          decoration: BoxDecoration(border: Border.all()),
+          margin: const EdgeInsets.only(bottom: 5),
+          child: Center(
+              child: Text(
+                  agoraManager.isJoined
+                      ? 'Waiting for a remote user to join'
+                      : 'Join a channel',
+                  textAlign: TextAlign.center)));
     }
   }
 
@@ -148,6 +163,7 @@ class MyAppState extends State<MyApp> {
     await agoraManager.setupVideoSDKEngine();
 
     setState(() {
+      initializeUiHelper(agoraManager, setStateCallback);
       isAgoraManagerInitialized = true;
     });
   }
@@ -196,16 +212,6 @@ class MyAppState extends State<MyApp> {
       case 'onUserOffline':
         setState(() {});
         break;
-
-      case 'onTokenPrivilegeWillExpire':
-        // Renew the token
-        agoraManager.renewToken();
-        break;
-
-      default:
-        // Handle unknown event or provide a default case
-        showMessage('Event Name: $eventName, Event Args: $eventArgs');
-        break;
     }
   }
 
@@ -213,5 +219,9 @@ class MyAppState extends State<MyApp> {
     scaffoldMessengerKey.currentState?.showSnackBar(SnackBar(
       content: Text(message),
     ));
+  }
+
+  void setStateCallback() {
+    setState(() {});
   }
 }
