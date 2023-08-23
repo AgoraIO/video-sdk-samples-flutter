@@ -103,6 +103,8 @@ class MyAppState extends State<MyApp> with UiHelper {
                         ),
                       ListTile(
                         title: Text(task.name),
+                        tileColor: Colors.grey[300],
+                        contentPadding: const EdgeInsets.symmetric(vertical: -8),
                         onTap: () {
                           onTaskClicked(task.id);
                         },
