@@ -36,7 +36,6 @@ class MyAppState extends State<MyApp> with UiHelper {
     Example(name: 'SDK quickstart', category: 'GET STARTED', id: '1'),
     Example(name: 'Secure authentication with tokens', category: 'GET STARTED', id: '2'),
     Example(name: 'Call quality best practice', category: 'DEVELOP', id: '3'),
-    //Example(name: 'Task 2', category: 'DEVELOP', id: '4'),
   ];
 
   Map<AgoraProduct, String> productFriendlyNames = {
@@ -86,44 +85,57 @@ class MyAppState extends State<MyApp> with UiHelper {
                 ],
               ),
             ),
-            Expanded(
-              child: ListView.builder(
-                itemCount: examples.length,
-                itemBuilder: (context, index) {
-                  final task = examples[index];
-                  return Column(
-                    crossAxisAlignment: CrossAxisAlignment.start,
-                    children: [
-                      if (index == 0 || examples[index - 1].category != task.category)
-                        ListTile(
-                          title: Text(
-                            task.category,
-                            style: const TextStyle(fontWeight: FontWeight.bold),
-                          ),
-                        ),
-                      ListTile(
-                        title: Text(task.name),
-                        tileColor: Colors.grey[300],
-                        contentPadding: const EdgeInsets.symmetric(vertical: -8),
-                        onTap: () {
-                          onTaskClicked(task.id);
-                        },
-                      ),
-                    ],
-                  );
-                },
-              ),
-            ),
+            exampleList(),
           ],
         ),
       ),
     );
   }
 
-
-  void onTaskClicked(String taskId) {
+  void onItemClicked(String taskId) {
     // Handle task clicked
     print('Task clicked: $taskId');
+  }
+
+  Widget exampleList() {
+    return Expanded(
+      child: ListView.builder(
+        itemCount: examples.length,
+        itemBuilder: (context, index) {
+          final example = examples[index];
+          return Column(
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              if (index == 0 || examples[index - 1].category != example.category)
+                ListTile(
+                  visualDensity: const VisualDensity(horizontal: 0, vertical: -4),
+                  title: Text(
+                    example.category,
+                    style: const TextStyle(fontSize: 15),
+                  ),
+                  contentPadding: const EdgeInsets.fromLTRB(18, 6, 12, 0),
+                ),
+          Container(
+            padding: const EdgeInsets.symmetric(vertical: 2), // Add vertical space
+            child: ListTile(
+              tileColor: Colors.grey[300],
+              visualDensity: const VisualDensity(horizontal: 0, vertical: -4),
+              title: Row(
+                mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                children: [
+                  Text(example.name),
+                  const Icon(Icons.arrow_right),
+                ],
+              ),
+              onTap: () {
+                onItemClicked(example.id);
+              },
+            ),
+          ),
+            ]);
+                  },
+      ),
+    );
   }
 
   Widget productDropDown() {
