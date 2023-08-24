@@ -1,19 +1,19 @@
 import 'dart:async';
 import 'package:flutter/material.dart';
-import 'package:agora_manager/agora_manager.dart';
-import 'package:agora_manager/ui_helper.dart';
+import 'package:flutter_reference_app/agora-manager/agora_manager.dart';
+import 'package:flutter_reference_app/agora-manager/ui_helper.dart';
 import 'package:agora_rtc_engine/agora_rtc_engine.dart';
 
-void main() => runApp(const MaterialApp(home: MyApp()));
+//void main() => runApp(const MaterialApp(home: MyApp()));
 
-class MyApp extends StatefulWidget {
-  const MyApp({Key? key}) : super(key: key);
+class SDKQuickstartScreen extends StatefulWidget {
+  const SDKQuickstartScreen({Key? key}) : super(key: key);
 
   @override
-  MyAppState createState() => MyAppState();
+  SDKQuickstartScreenState createState() => SDKQuickstartScreenState();
 }
 
-class MyAppState extends State<MyApp> with UiHelper {
+class SDKQuickstartScreenState extends State<SDKQuickstartScreen> with UiHelper {
   late AgoraManager agoraManager;
   bool isAgoraManagerInitialized = false;
   final GlobalKey<ScaffoldMessengerState> scaffoldMessengerKey =

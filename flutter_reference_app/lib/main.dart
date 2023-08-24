@@ -1,8 +1,6 @@
-import 'dart:async';
 import 'package:flutter/material.dart';
-import 'package:flutter_reference_app/agora-manager/agora_manager.dart';
-import 'package:agora_manager/ui_helper.dart';
-import 'package:agora_rtc_engine/agora_rtc_engine.dart';
+import 'package:flutter_reference_app/agora-manager/ui_helper.dart';
+import 'package:flutter_reference_app/sdk-quickstart/sdk_quickstart_ui.dart';
 
 void main() => runApp(const MaterialApp(home: MyApp()));
 
@@ -33,9 +31,9 @@ class MyAppState extends State<MyApp> with UiHelper {
       GlobalKey<ScaffoldMessengerState>(); // Global key to access the scaffold
   AgoraProduct selectedProduct = AgoraProduct.VIDEO_CALLING;
   final List<Example> examples = [
-    Example(name: 'SDK quickstart', category: 'GET STARTED', id: '1'),
-    Example(name: 'Secure authentication with tokens', category: 'GET STARTED', id: '2'),
-    Example(name: 'Call quality best practice', category: 'DEVELOP', id: '3'),
+    Example(name: 'SDK quickstart', category: 'GET STARTED', id: 'sdk_quickstart'),
+    Example(name: 'Secure authentication with tokens', category: 'GET STARTED', id: 'authentication_workflow'),
+    Example(name: 'Call quality best practice', category: 'DEVELOP', id: 'call_quality'),
   ];
 
   Map<AgoraProduct, String> productFriendlyNames = {
@@ -92,9 +90,31 @@ class MyAppState extends State<MyApp> with UiHelper {
     );
   }
 
-  void onItemClicked(String taskId) {
-    // Handle task clicked
-    print('Task clicked: $taskId');
+  void onItemClicked(String exampleId) {
+    print('ExampleId clicked: $exampleId');
+
+    switch (exampleId) {
+      case 'sdk_quickstart':
+        Navigator.push(
+          context,
+          MaterialPageRoute(builder: (context) => const SDKQuickstartScreen()),
+        );
+        break;
+      case 'authentication_workflow':
+        Navigator.push(
+          context,
+          MaterialPageRoute(builder: (context) => const SDKQuickstartScreen()),
+        );
+        break;
+      case 'call_quality':
+        Navigator.push(
+          context,
+          MaterialPageRoute(builder: (context) => const SDKQuickstartScreen()),
+        );
+        break;
+      default:
+        print("Invalid day");
+    }
   }
 
   Widget exampleList() {
@@ -104,36 +124,40 @@ class MyAppState extends State<MyApp> with UiHelper {
         itemBuilder: (context, index) {
           final example = examples[index];
           return Column(
-            crossAxisAlignment: CrossAxisAlignment.start,
-            children: [
-              if (index == 0 || examples[index - 1].category != example.category)
-                ListTile(
-                  visualDensity: const VisualDensity(horizontal: 0, vertical: -4),
-                  title: Text(
-                    example.category,
-                    style: const TextStyle(fontSize: 15),
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                if (index == 0 ||
+                    examples[index - 1].category != example.category)
+                  ListTile(
+                    visualDensity:
+                        const VisualDensity(horizontal: 0, vertical: -4),
+                    title: Text(
+                      example.category,
+                      style: const TextStyle(fontSize: 15),
+                    ),
+                    contentPadding: const EdgeInsets.fromLTRB(18, 6, 12, 0),
                   ),
-                  contentPadding: const EdgeInsets.fromLTRB(18, 6, 12, 0),
+                Container(
+                  padding: const EdgeInsets.symmetric(horizontal: 10,
+                      vertical: 2), // Add vertical space
+                  child: ListTile(
+                    tileColor: Colors.grey[300],
+                    visualDensity:
+                        const VisualDensity(horizontal: 0, vertical: -4),
+                    title: Row(
+                      mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                      children: [
+                        Text(example.name),
+                        const Icon(Icons.arrow_right),
+                      ],
+                    ),
+                    onTap: () {
+                      onItemClicked(example.id);
+                    },
+                  ),
                 ),
-          Container(
-            padding: const EdgeInsets.symmetric(vertical: 2), // Add vertical space
-            child: ListTile(
-              tileColor: Colors.grey[300],
-              visualDensity: const VisualDensity(horizontal: 0, vertical: -4),
-              title: Row(
-                mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                children: [
-                  Text(example.name),
-                  const Icon(Icons.arrow_right),
-                ],
-              ),
-              onTap: () {
-                onItemClicked(example.id);
-              },
-            ),
-          ),
-            ]);
-                  },
+              ]);
+        },
       ),
     );
   }
@@ -155,15 +179,5 @@ class MyAppState extends State<MyApp> with UiHelper {
         },
       ).toList(),
     );
-  }
-
-  @override
-  void initState() {
-    super.initState();
-  }
-
-  @override
-  Future<void> dispose() async {
-    super.dispose();
   }
 }

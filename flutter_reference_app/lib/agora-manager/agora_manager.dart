@@ -49,7 +49,7 @@ class AgoraManager {
   Future<void> initialize() async {
     try {
       String configString = await rootBundle
-          .loadString('packages/agora_manager/assets/config/config.json');
+          .loadString('assets/config/config.json');
       config = jsonDecode(configString);
     } catch (e) {
       messageCallback(e.toString());

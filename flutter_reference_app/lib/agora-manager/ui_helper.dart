@@ -1,6 +1,6 @@
 import 'dart:async';
 import 'package:flutter/material.dart';
-import 'package:agora_manager/agora_manager.dart';
+import 'package:flutter_reference_app/agora-manager/agora_manager.dart';
 
 class UiHelper {
   late AgoraManager _agoraManager;
