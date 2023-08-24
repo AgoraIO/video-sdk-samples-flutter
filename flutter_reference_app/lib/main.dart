@@ -1,6 +1,6 @@
 import 'dart:async';
 import 'package:flutter/material.dart';
-import 'package:agora_manager/agora_manager.dart';
+import 'package:flutter_reference_app/agora-manager/agora_manager.dart';
 import 'package:agora_manager/ui_helper.dart';
 import 'package:agora_rtc_engine/agora_rtc_engine.dart';
 
