@@ -116,7 +116,7 @@ class AgoraManager {
         eventArgs["connection"] = connection;
         eventArgs["remoteUid"] = remoteUid;
         eventArgs["reason"] = reason;
-        eventCallback("onJoinChannelSuccess", eventArgs);
+        eventCallback("onUserOffline", eventArgs);
       },
     );
   }

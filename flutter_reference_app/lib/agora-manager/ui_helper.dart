@@ -135,4 +135,5 @@ class UiHelper {
     _setStateCallback();
     if (_agoraManager.isJoined) leave();
   }
+
 }

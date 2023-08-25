@@ -3,6 +3,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_reference_app/agora-manager/agora_manager.dart';
 import 'package:flutter_reference_app/agora-manager/ui_helper.dart';
 import 'package:agora_rtc_engine/agora_rtc_engine.dart';
+import 'package:flutter_reference_app/main.dart';
 
 //void main() => runApp(const MaterialApp(home: MyApp()));
 
@@ -109,6 +110,9 @@ class SDKQuickstartScreenState extends State<SDKQuickstartScreen> with UiHelper 
         break;
 
       case 'onUserOffline':
+        if (mainViewUid == eventArgs["remoteUid"]){
+          mainViewUid = -1;
+        }
         setState(() {});
         break;
 

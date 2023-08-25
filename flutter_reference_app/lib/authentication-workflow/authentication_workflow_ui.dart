@@ -20,7 +20,9 @@ class AuthenticationWorkflowScreenState extends State<AuthenticationWorkflowScre
   final GlobalKey<ScaffoldMessengerState> scaffoldMessengerKey =
       GlobalKey<ScaffoldMessengerState>(); // Global key to access the scaffold
   final channelTextController =
-      TextEditingController(text: ''); // To access the TextField
+      TextEditingController(text: ''); // To access the channel name
+  final serverUrlTextController =
+      TextEditingController(text: 'URL'); // To access the Url
 
   // Build UI
   @override
@@ -41,11 +43,6 @@ class AuthenticationWorkflowScreenState extends State<AuthenticationWorkflowScre
           body: ListView(
             padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 4),
             children: [
-              TextField(
-                controller: channelTextController,
-                decoration: const InputDecoration(
-                    hintText: 'Type the channel name here'),
-              ),
               mainVideoView(), // Widget for local video
               scrollVideoView(), // Widget for Remote video
               radioButtons(), // Choose host or audience
@@ -57,6 +54,16 @@ class AuthenticationWorkflowScreenState extends State<AuthenticationWorkflowScre
                       agoraManager.isJoined ? () => {leave()} : () => {join()},
                   child: Text(agoraManager.isJoined ? "Leave" : "Join"),
                 ),
+              ),
+              TextField(
+                controller: serverUrlTextController,
+                decoration: const InputDecoration(
+                    hintText: 'Token server URL'),
+              ),
+              TextField(
+                controller: channelTextController,
+                decoration: const InputDecoration(
+                    hintText: 'Type the channel name here'),
               ),
             ],
           )),
@@ -81,10 +88,13 @@ class AuthenticationWorkflowScreenState extends State<AuthenticationWorkflowScre
     setState(() {
       initializeUiHelper(agoraManager, setStateCallback);
       isAgoraManagerInitialized = true;
+      channelTextController.text=agoraManager.config['channelName'];
+      serverUrlTextController.text=agoraManager.config['serverUrl'];
     });
   }
 
   Future<void> join() async {
+    agoraManager.config['serverUrl'] = serverUrlTextController.text;
     String channelName = channelTextController.text;
     if (channelName.isEmpty) {
       showMessage("Enter a channel name");
