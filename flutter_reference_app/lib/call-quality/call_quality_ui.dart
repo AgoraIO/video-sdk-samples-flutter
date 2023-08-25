@@ -5,16 +5,18 @@ import 'package:flutter_reference_app/agora-manager/agora_manager.dart';
 import 'package:flutter_reference_app/agora-manager/ui_helper.dart';
 import 'package:agora_rtc_engine/agora_rtc_engine.dart';
 
-void main() => runApp(const MaterialApp(home: CallQuality()));
+//void main() => runApp(const MaterialApp(home: CallQuality()));
 
-class CallQuality extends StatefulWidget {
-  const CallQuality({Key? key}) : super(key: key);
+class CallQualityScreen extends StatefulWidget {
+  final ProductName selectedProduct;
+
+  const CallQualityScreen({Key? key, required this.selectedProduct}) : super(key: key);
 
   @override
-  CallQualityState createState() => CallQualityState();
+  CallQualityScreenState createState() => CallQualityScreenState();
 }
 
-class CallQualityState extends State<CallQuality> with UiHelper {
+class CallQualityScreenState extends State<CallQualityScreen> with UiHelper {
   late AgoraManagerCallQuality agoraManager;
   bool isAgoraManagerInitialized = false;
   final GlobalKey<ScaffoldMessengerState> scaffoldMessengerKey =
@@ -67,7 +69,7 @@ class CallQualityState extends State<CallQuality> with UiHelper {
   }
 
   void changeVideoQuality() {
-    if (agoraManager.remoteUid == null) return;
+    if (agoraManager.remoteUids.isNotEmpty) return;
     agoraManager.setVideoQuality(!isHighQuality);
 
     setState(() {
@@ -112,11 +114,11 @@ class CallQualityState extends State<CallQuality> with UiHelper {
 
 // Display remote user's video
   Widget _remoteVideo() {
-    if (agoraManager.remoteUid != null) {
+    if (agoraManager.remoteUids.isNotEmpty) {
       try {
         return Stack(
           children: [
-            agoraManager.remoteVideoView(),
+            agoraManager.remoteVideoView(agoraManager.remoteUids[0]),
             Positioned(
               bottom: 10,
               left: 10,
@@ -151,7 +153,7 @@ class CallQualityState extends State<CallQuality> with UiHelper {
   Future<void> initialize() async {
     // Set up an instance of AgoraManager
     agoraManager = await AgoraManagerCallQuality.create(
-      currentProduct: ProductName.videoCalling,
+      currentProduct: widget.selectedProduct,
       messageCallback: showMessage,
       eventCallback: eventCallback,
     );
@@ -187,7 +189,7 @@ class CallQualityState extends State<CallQuality> with UiHelper {
 
       case 'onRemoteVideoStats':
         RemoteVideoStats stats = eventArgs["stats"];
-        if (stats.uid == agoraManager.remoteUid) {
+        if (stats.uid == agoraManager.remoteUids[0]) {
           setState(() {
             videoCaption = agoraManager.qualityStatsSummary;
           });

@@ -5,16 +5,18 @@ import 'package:flutter_reference_app/agora-manager/agora_manager.dart';
 import 'package:flutter_reference_app/agora-manager/ui_helper.dart';
 import 'package:agora_rtc_engine/agora_rtc_engine.dart';
 
-void main() => runApp(const MaterialApp(home: AuthenticationWorkflow()));
+//void main() => runApp(const MaterialApp(home: AuthenticationWorkflow()));
 
-class AuthenticationWorkflow extends StatefulWidget {
-  const AuthenticationWorkflow({Key? key}) : super(key: key);
+class AuthenticationWorkflowScreen extends StatefulWidget {
+  final ProductName selectedProduct;
+
+  const AuthenticationWorkflowScreen({Key? key, required this.selectedProduct}) : super(key: key);
 
   @override
-  AuthenticationWorkflowState createState() => AuthenticationWorkflowState();
+  AuthenticationWorkflowScreenState createState() => AuthenticationWorkflowScreenState();
 }
 
-class AuthenticationWorkflowState extends State<AuthenticationWorkflow> with UiHelper {
+class AuthenticationWorkflowScreenState extends State<AuthenticationWorkflowScreen> with UiHelper {
   late AgoraManagerAuthentication agoraManager;
   bool isAgoraManagerInitialized = false;
   final GlobalKey<ScaffoldMessengerState> scaffoldMessengerKey =
@@ -126,12 +128,12 @@ class AuthenticationWorkflowState extends State<AuthenticationWorkflow> with UiH
       return Container();
     }
 
-    if (agoraManager.remoteUid != null) {
+    if (agoraManager.remoteUids.isNotEmpty) {
       return Container(
         height: 240,
         decoration: BoxDecoration(border: Border.all()),
         margin: const EdgeInsets.only(bottom: 5),
-        child: Center(child: agoraManager.remoteVideoView()),
+        child: Center(child: agoraManager.remoteVideoView(agoraManager.remoteUids[0])),
       );
     } else {
       return Container(
@@ -156,7 +158,7 @@ class AuthenticationWorkflowState extends State<AuthenticationWorkflow> with UiH
   Future<void> initialize() async {
     // Set up an instance of AgoraManager
     agoraManager = await AgoraManagerAuthentication.create(
-      currentProduct: ProductName.videoCalling,
+      currentProduct: widget.selectedProduct,
       messageCallback: showMessage,
       eventCallback: eventCallback,
     );

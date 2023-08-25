@@ -7,7 +7,9 @@ import 'package:agora_rtc_engine/agora_rtc_engine.dart';
 //void main() => runApp(const MaterialApp(home: MyApp()));
 
 class SDKQuickstartScreen extends StatefulWidget {
-  const SDKQuickstartScreen({Key? key}) : super(key: key);
+  final ProductName selectedProduct;
+
+  const SDKQuickstartScreen({Key? key, required this.selectedProduct}) : super(key: key);
 
   @override
   SDKQuickstartScreenState createState() => SDKQuickstartScreenState();
@@ -64,7 +66,7 @@ class SDKQuickstartScreenState extends State<SDKQuickstartScreen> with UiHelper 
   Future<void> initialize() async {
     // Set up an instance of AgoraManager
     agoraManager = await AgoraManager.create(
-      currentProduct: ProductName.broadcastStreaming,
+      currentProduct: widget.selectedProduct,
       messageCallback: showMessage,
       eventCallback: eventCallback,
     );

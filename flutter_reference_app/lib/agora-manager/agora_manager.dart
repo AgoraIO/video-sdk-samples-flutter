@@ -16,7 +16,7 @@ enum ProductName {
 class AgoraManager {
   late Map<String, dynamic> config;
   ProductName currentProduct = ProductName.videoCalling;
-  int? remoteUid; // uid of the remote user
+  List<int> remoteUids = []; // Uids of remote users in the channel
   bool isJoined = false; // Indicates if the local user has joined the channel
   bool isBroadcaster = true; // Client role
   late RtcEngine agoraEngine; // Agora engine instance
@@ -56,7 +56,7 @@ class AgoraManager {
     }
   }
 
-  AgoraVideoView remoteVideoView() {
+  AgoraVideoView remoteVideoView(int remoteUid) {
     return AgoraVideoView(
       controller: VideoViewController.remote(
         rtcEngine: agoraEngine,
@@ -81,7 +81,7 @@ class AgoraManager {
           ConnectionStateType state, ConnectionChangedReasonType reason) {
         if (reason ==
             ConnectionChangedReasonType.connectionChangedLeaveChannel) {
-          remoteUid = null;
+          remoteUids.clear();
           isJoined = false;
         }
         Map<String, dynamic> eventArgs = {};
@@ -100,7 +100,7 @@ class AgoraManager {
         eventCallback("onJoinChannelSuccess", eventArgs);
       },
       onUserJoined: (RtcConnection connection, int remoteUid, int elapsed) {
-        this.remoteUid = remoteUid;
+        remoteUids.add(remoteUid);
         messageCallback("Remote user uid:$remoteUid joined the channel");
         Map<String, dynamic> eventArgs = {};
         eventArgs["connection"] = connection;
@@ -110,7 +110,7 @@ class AgoraManager {
       },
       onUserOffline: (RtcConnection connection, int remoteUid,
           UserOfflineReasonType reason) {
-        this.remoteUid = null;
+        remoteUids.remove(remoteUid);
         messageCallback("Remote user uid:$remoteUid left the channel");
         Map<String, dynamic> eventArgs = {};
         eventArgs["connection"] = connection;
@@ -161,7 +161,7 @@ class AgoraManager {
   }
 
   Future<void> leave() async {
-    remoteUid = null;
+    remoteUids.clear();
     isJoined = false;
     await agoraEngine.leaveChannel();
   }

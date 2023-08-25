@@ -51,6 +51,20 @@ class UiHelper {
       return Container();
     }
 
+    return ListView.builder(
+      scrollDirection: Axis.horizontal,
+      itemCount: _agoraManager.remoteUids.length,
+      itemBuilder: (context, index) {
+        return Padding(
+          padding: const EdgeInsets.all(8.0),
+          child: _agoraManager.remoteVideoView(
+              _agoraManager.remoteUids[index]
+          ), // Replace with your function
+        );
+      },
+    );
+
+    /*
     if (_agoraManager.remoteUid != null) {
       return Container(
         height: 240,
@@ -69,6 +83,7 @@ class UiHelper {
           )
       );
     }
+     */
   }
 
   Widget radioButtons() {

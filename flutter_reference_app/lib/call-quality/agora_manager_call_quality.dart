@@ -170,10 +170,10 @@ class AgoraManagerCallQuality extends AgoraManagerAuthentication {
 
   void setVideoQuality(bool isHighQuality) {
     if (isHighQuality) {
-      agoraEngine.setRemoteVideoStreamType(uid: remoteUid!,
+      agoraEngine.setRemoteVideoStreamType(uid: remoteUids[0],
           streamType: VideoStreamType.videoStreamHigh);
     } else {
-      agoraEngine.setRemoteVideoStreamType(uid: remoteUid!,
+      agoraEngine.setRemoteVideoStreamType(uid: remoteUids[0],
           streamType: VideoStreamType.videoStreamLow);
     }
   }

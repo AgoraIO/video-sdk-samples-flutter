@@ -1,6 +1,9 @@
 import 'package:flutter/material.dart';
+import 'package:flutter_reference_app/agora-manager/agora_manager.dart';
 import 'package:flutter_reference_app/agora-manager/ui_helper.dart';
 import 'package:flutter_reference_app/sdk-quickstart/sdk_quickstart_ui.dart';
+import 'package:flutter_reference_app/authentication-workflow/authentication_workflow_ui.dart';
+import 'package:flutter_reference_app/call-quality/call_quality_ui.dart';
 
 void main() => runApp(const MaterialApp(home: MyApp()));
 
@@ -9,13 +12,6 @@ class MyApp extends StatefulWidget {
 
   @override
   MyAppState createState() => MyAppState();
-}
-
-enum AgoraProduct {
-  VIDEO_CALLING,
-  VOICE_CALLING,
-  INTERACTIVE_LIVE_STREAMING,
-  BROADCAST_STREAMING,
 }
 
 class Example {
@@ -29,18 +25,18 @@ class Example {
 class MyAppState extends State<MyApp> with UiHelper {
   final GlobalKey<ScaffoldMessengerState> scaffoldMessengerKey =
       GlobalKey<ScaffoldMessengerState>(); // Global key to access the scaffold
-  AgoraProduct selectedProduct = AgoraProduct.VIDEO_CALLING;
+  ProductName selectedProduct = ProductName.videoCalling;
   final List<Example> examples = [
     Example(name: 'SDK quickstart', category: 'GET STARTED', id: 'sdk_quickstart'),
     Example(name: 'Secure authentication with tokens', category: 'GET STARTED', id: 'authentication_workflow'),
     Example(name: 'Call quality best practice', category: 'DEVELOP', id: 'call_quality'),
   ];
 
-  Map<AgoraProduct, String> productFriendlyNames = {
-    AgoraProduct.VIDEO_CALLING: 'Video Calling',
-    AgoraProduct.VOICE_CALLING: 'Voice Calling',
-    AgoraProduct.INTERACTIVE_LIVE_STREAMING: 'Interactive Live Streaming',
-    AgoraProduct.BROADCAST_STREAMING: 'Broadcast Streaming',
+  Map<ProductName, String> productFriendlyNames = {
+    ProductName.videoCalling: 'Video Calling',
+    ProductName.voiceCalling: 'Voice Calling',
+    ProductName.interactiveLiveStreaming: 'Interactive Live Streaming',
+    ProductName.broadcastStreaming: 'Broadcast Streaming',
   };
 
   // Build UI
@@ -97,23 +93,23 @@ class MyAppState extends State<MyApp> with UiHelper {
       case 'sdk_quickstart':
         Navigator.push(
           context,
-          MaterialPageRoute(builder: (context) => const SDKQuickstartScreen()),
+          MaterialPageRoute(builder: (context) => SDKQuickstartScreen(selectedProduct: selectedProduct)),
         );
         break;
       case 'authentication_workflow':
         Navigator.push(
           context,
-          MaterialPageRoute(builder: (context) => const SDKQuickstartScreen()),
+          MaterialPageRoute(builder: (context) => AuthenticationWorkflowScreen(selectedProduct: selectedProduct)),
         );
         break;
       case 'call_quality':
         Navigator.push(
           context,
-          MaterialPageRoute(builder: (context) => const SDKQuickstartScreen()),
+          MaterialPageRoute(builder: (context) => CallQualityScreen(selectedProduct: selectedProduct)),
         );
         break;
       default:
-        print("Invalid day");
+        print("Invalid");
     }
   }
 
@@ -163,16 +159,16 @@ class MyAppState extends State<MyApp> with UiHelper {
   }
 
   Widget productDropDown() {
-    return DropdownButton<AgoraProduct>(
+    return DropdownButton<ProductName>(
       value: selectedProduct,
       onChanged: (newValue) {
         setState(() {
           selectedProduct = newValue!;
         });
       },
-      items: AgoraProduct.values.map<DropdownMenuItem<AgoraProduct>>(
-        (AgoraProduct value) {
-          return DropdownMenuItem<AgoraProduct>(
+      items: ProductName.values.map<DropdownMenuItem<ProductName>>(
+        (ProductName value) {
+          return DropdownMenuItem<ProductName>(
             value: value,
             child: Text(productFriendlyNames[value]!),
           );
