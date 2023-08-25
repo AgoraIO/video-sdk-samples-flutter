@@ -5,8 +5,6 @@ import 'package:flutter_reference_app/agora-manager/agora_manager.dart';
 import 'package:flutter_reference_app/agora-manager/ui_helper.dart';
 import 'package:agora_rtc_engine/agora_rtc_engine.dart';
 
-//void main() => runApp(const MaterialApp(home: AuthenticationWorkflow()));
-
 class AuthenticationWorkflowScreen extends StatefulWidget {
   final ProductName selectedProduct;
 
@@ -48,8 +46,8 @@ class AuthenticationWorkflowScreenState extends State<AuthenticationWorkflowScre
                 decoration: const InputDecoration(
                     hintText: 'Type the channel name here'),
               ),
-              localPreview(), // Widget for local video
-              remoteVideo(), // Widget for Remote video
+              mainVideoView(), // Widget for local video
+              scrollVideoView(), // Widget for Remote video
               radioButtons(), // Choose host or audience
               const SizedBox(height: 5),
               SizedBox(
@@ -63,90 +61,6 @@ class AuthenticationWorkflowScreenState extends State<AuthenticationWorkflowScre
             ],
           )),
     );
-  }
-
-  Widget _radioButtons() {
-    // Radio Buttons
-    if (agoraManager.currentProduct == ProductName.interactiveLiveStreaming ||
-        agoraManager.currentProduct == ProductName.broadcastStreaming) {
-      return Align(
-          alignment: Alignment.center,
-          child: Row(children: <Widget>[
-            Radio<bool>(
-              value: true,
-              groupValue: agoraManager.isBroadcaster,
-              onChanged: (value) => _handleRadioValueChange(value),
-            ),
-            const Text('Host'),
-            Radio<bool>(
-              value: false,
-              groupValue: agoraManager.isBroadcaster,
-              onChanged: (value) => _handleRadioValueChange(value),
-            ),
-            const Text('Audience'),
-          ]));
-    } else {
-      return Container();
-    }
-  }
-
-  // Set the client role when a radio button is selected
-  void _handleRadioValueChange(bool? value) async {
-    setState(() {
-      agoraManager.isBroadcaster = (value == true);
-    });
-    if (agoraManager.isJoined) leave();
-  }
-
-// Display local video preview
-  Widget _localPreview() {
-    if (agoraManager.isJoined && agoraManager.isBroadcaster) {
-      return Container(
-          height: 240,
-          decoration: BoxDecoration(border: Border.all()),
-          margin: const EdgeInsets.only(bottom: 5),
-          child: Center(child: agoraManager.localVideoView()));
-    } else if (!agoraManager.isBroadcaster &&
-        (agoraManager.currentProduct == ProductName.interactiveLiveStreaming ||
-            agoraManager.currentProduct == ProductName.broadcastStreaming)) {
-      return Container();
-    } else {
-      return Container(
-          height: 240,
-          decoration: BoxDecoration(border: Border.all()),
-          margin: const EdgeInsets.only(bottom: 16),
-          child: const Center(
-              child: Text('Join a channel', textAlign: TextAlign.center)));
-    }
-  }
-
-// Display remote user's video
-  Widget _remoteVideo() {
-    if (agoraManager.isBroadcaster &&
-        (agoraManager.currentProduct == ProductName.interactiveLiveStreaming ||
-            agoraManager.currentProduct == ProductName.broadcastStreaming)) {
-      return Container();
-    }
-
-    if (agoraManager.remoteUids.isNotEmpty) {
-      return Container(
-        height: 240,
-        decoration: BoxDecoration(border: Border.all()),
-        margin: const EdgeInsets.only(bottom: 5),
-        child: Center(child: agoraManager.remoteVideoView(agoraManager.remoteUids[0])),
-      );
-    } else {
-      return Container(
-          height: 240,
-          decoration: BoxDecoration(border: Border.all()),
-          margin: const EdgeInsets.only(bottom: 5),
-          child: Center(
-              child: Text(
-                  agoraManager.isJoined
-                      ? 'Waiting for a remote user to join'
-                      : 'Join a channel',
-                  textAlign: TextAlign.center)));
-    }
   }
 
   @override
@@ -179,10 +93,6 @@ class AuthenticationWorkflowScreenState extends State<AuthenticationWorkflowScre
       showMessage("Fetching a token ...");
     }
     await agoraManager.fetchTokenAndJoin(channelName);
-  }
-
-  Future<void> leave() async {
-    await agoraManager.leave();
   }
 
   // Release the resources when you leave

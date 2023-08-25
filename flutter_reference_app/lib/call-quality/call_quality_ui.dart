@@ -5,8 +5,6 @@ import 'package:flutter_reference_app/agora-manager/agora_manager.dart';
 import 'package:flutter_reference_app/agora-manager/ui_helper.dart';
 import 'package:agora_rtc_engine/agora_rtc_engine.dart';
 
-//void main() => runApp(const MaterialApp(home: CallQuality()));
-
 class CallQualityScreen extends StatefulWidget {
   final ProductName selectedProduct;
 
@@ -51,8 +49,8 @@ class CallQualityScreenState extends State<CallQualityScreen> with UiHelper {
                     : const Text("Switch to high quality"),
                 onPressed: () => {changeVideoQuality()},
               ),
-              localPreview(), // Widget for local video
-              remoteVideo(), // Widget for Remote video
+              mainVideoView(), // Widget for local video
+              scrollVideoView(), // Widget for Remote video
               radioButtons(), // Choose host or audience
               const SizedBox(height: 5),
               SizedBox(
@@ -98,50 +96,6 @@ class CallQualityScreenState extends State<CallQualityScreen> with UiHelper {
         child: Text(agoraManager.networkQuality.toString()),
       )
     ]);
-  }
-
-// Display local video preview
-  Widget _localPreview() {
-    if (agoraManager.isBroadcaster) {
-      return agoraManager.localVideoView();
-    } else {
-      return const Text(
-        'Join a channel',
-        textAlign: TextAlign.center,
-      );
-    }
-  }
-
-// Display remote user's video
-  Widget _remoteVideo() {
-    if (agoraManager.remoteUids.isNotEmpty) {
-      try {
-        return Stack(
-          children: [
-            agoraManager.remoteVideoView(agoraManager.remoteUids[0]),
-            Positioned(
-              bottom: 10,
-              left: 10,
-              child: Align(
-                alignment: Alignment.bottomLeft,
-                child: Text(
-                  videoCaption,
-                  style: const TextStyle(color: Colors.white),
-                ),
-              ),
-            ),
-          ],
-        );
-      } catch (e) {
-        showMessage("error!");
-        return const Text('error');
-      }
-    } else {
-      return Text(
-        agoraManager.isJoined ? 'Waiting for a remote user to join' : '',
-        textAlign: TextAlign.center,
-      );
-    }
   }
 
   @override

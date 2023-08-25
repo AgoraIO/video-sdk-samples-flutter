@@ -40,8 +40,8 @@ class SDKQuickstartScreenState extends State<SDKQuickstartScreen> with UiHelper 
           body: ListView(
             padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 4),
             children: [
-              localPreview(), // Widget for local video
-              remoteVideo(), // Widget for Remote video
+              mainVideoView(), // Widget for local video
+              scrollVideoView(), // Widget for Remote video
               radioButtons(), // Choose host or audience
               const SizedBox(height: 5),
               SizedBox(
