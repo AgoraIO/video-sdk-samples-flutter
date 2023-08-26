@@ -6,7 +6,7 @@ import 'package:permission_handler/permission_handler.dart';
 class AgoraManagerCallQuality extends AgoraManagerAuthentication {
   int networkQuality = 0; // Quality index of the network connection
   int counter = 0; // Controls the frequency of notifications
-  String qualityStatsSummary = "";
+  String remoteVideoStatsSummary = "";
 
   AgoraManagerCallQuality({
     required ProductName currentProduct,
@@ -142,11 +142,12 @@ class AgoraManagerCallQuality extends AgoraManagerAuthentication {
         messageCallback(msg);
       },
       onRemoteVideoStats: (RtcConnection connection, RemoteVideoStats stats) {
-        qualityStatsSummary =
-        "Renderer frame rate: ${stats.rendererOutputFrameRate}"
-            "\nReceived bitrate: ${stats.receivedBitrate}"
-            "\nPublish duration: ${stats.publishDuration}"
-            "\nFrame loss rate: ${stats.frameLossRate}";
+        remoteVideoStatsSummary =
+          "Uid: ${stats.uid}"
+          "\nRenderer frame rate: ${stats.rendererOutputFrameRate}"
+          "\nReceived bitrate: ${stats.receivedBitrate}"
+          "\nPublish duration: ${stats.publishDuration}"
+          "\nFrame loss rate: ${stats.frameLossRate}";
 
         Map<String, dynamic> eventArgs = {};
         eventArgs["connection"] = connection;
@@ -168,12 +169,12 @@ class AgoraManagerCallQuality extends AgoraManagerAuthentication {
     );
   }
 
-  void setVideoQuality(bool isHighQuality) {
+  void setVideoQuality(int remoteUid, bool isHighQuality) {
     if (isHighQuality) {
-      agoraEngine.setRemoteVideoStreamType(uid: remoteUids[0],
+      agoraEngine.setRemoteVideoStreamType(uid: remoteUid,
           streamType: VideoStreamType.videoStreamHigh);
     } else {
-      agoraEngine.setRemoteVideoStreamType(uid: remoteUids[0],
+      agoraEngine.setRemoteVideoStreamType(uid: remoteUid,
           streamType: VideoStreamType.videoStreamLow);
     }
   }

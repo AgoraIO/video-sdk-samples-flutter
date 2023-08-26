@@ -19,8 +19,8 @@ class CallQualityScreenState extends State<CallQualityScreen> with UiHelper {
   bool isAgoraManagerInitialized = false;
   final GlobalKey<ScaffoldMessengerState> scaffoldMessengerKey =
       GlobalKey<ScaffoldMessengerState>(); // Global key to access the scaffold
-  bool isHighQuality = true; // Quality of the remote video stream being played
   String videoCaption = "";
+  bool isEchoTestRunning = false;
 
   // Build UI
   @override
@@ -41,16 +41,8 @@ class CallQualityScreenState extends State<CallQualityScreen> with UiHelper {
           body: ListView(
             padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 4),
             children: [
-              _networkStatus(),
-              const SizedBox(height: 8),
-              ElevatedButton(
-                child: isHighQuality
-                    ? const Text("Switch to low quality")
-                    : const Text("Switch to high quality"),
-                onPressed: () => {changeVideoQuality()},
-              ),
-              mainVideoView(), // Widget for local video
-              scrollVideoView(), // Widget for Remote video
+              mainVideoWithTextOverlay(), // The main video frame
+              scrollVideoView(), // Scroll view with multiple videos
               radioButtons(), // Choose host or audience
               const SizedBox(height: 5),
               SizedBox(
@@ -61,18 +53,21 @@ class CallQualityScreenState extends State<CallQualityScreen> with UiHelper {
                   child: Text(agoraManager.isJoined ? "Leave" : "Join"),
                 ),
               ),
+              ElevatedButton(
+                child: isEchoTestRunning
+                    ? const Text("Stop Echo Test")
+                    : const Text("Start Echo Test"),
+                onPressed: () => {echoTest()},
+              ),
+              const SizedBox(height: 8),
+              _networkStatus(),
             ],
           )),
     );
   }
 
-  void changeVideoQuality() {
-    if (agoraManager.remoteUids.isNotEmpty) return;
-    agoraManager.setVideoQuality(!isHighQuality);
+  void echoTest() {
 
-    setState(() {
-      isHighQuality = !isHighQuality;
-    });
   }
 
   Widget _networkStatus() {
@@ -90,7 +85,7 @@ class CallQualityScreenState extends State<CallQualityScreen> with UiHelper {
     return Row(mainAxisAlignment: MainAxisAlignment.end, children: <Widget>[
       const Text("Network status: "),
       CircleAvatar(
-        foregroundColor: Colors.black,
+        foregroundColor: Colors.grey,
         backgroundColor: statusColor,
         radius: 10,
         child: Text(agoraManager.networkQuality.toString()),
@@ -130,6 +125,36 @@ class CallQualityScreenState extends State<CallQualityScreen> with UiHelper {
     super.dispose();
   }
 
+  Widget mainVideoWithTextOverlay() {
+    String overlayText = getOverlayText();
+    return Stack(
+      children: [
+        mainVideoView(),
+        Positioned(
+          top: 0,
+          left: 0,
+          right: 0,
+          child: Container(
+            color: Colors.black.withOpacity(overlayText.isEmpty ? 0 : 0.3),
+            padding: const EdgeInsets.all(8.0),
+            child: Text(
+              overlayText,
+              style: const TextStyle(color: Colors.white),
+            ),
+          ),
+        ),
+      ],
+    );
+  }
+
+  String getOverlayText() {
+    if (agoraManager.isJoined) {
+      return videoCaption;
+    } else {
+      return "";
+    }
+  }
+
   void eventCallback(String eventName, Map<String, dynamic> eventArgs) {
     // Handle the event based on the event name and named arguments
     switch (eventName) {
@@ -143,11 +168,13 @@ class CallQualityScreenState extends State<CallQualityScreen> with UiHelper {
 
       case 'onRemoteVideoStats':
         RemoteVideoStats stats = eventArgs["stats"];
-        if (stats.uid == agoraManager.remoteUids[0]) {
           setState(() {
-            videoCaption = agoraManager.qualityStatsSummary;
+            if (mainViewUid == stats.uid) {
+              videoCaption = agoraManager.remoteVideoStatsSummary;
+            } else {
+              videoCaption = "";
+            }
           });
-        }
         break;
 
       case 'onLastmileQuality':
@@ -166,6 +193,25 @@ class CallQualityScreenState extends State<CallQualityScreen> with UiHelper {
       case 'onUserOffline':
         setState(() {});
         break;
+    }
+  }
+
+  @override
+  void handleContainerTap(int remoteUid) {
+    // Switch to low quality for the video going out of the main view
+    if (mainViewUid > 0) {
+      agoraManager.setVideoQuality(mainViewUid, false);
+    }
+
+   setState(() {
+     // Switch video
+     mainViewUid = remoteUid;
+     videoCaption = "";
+   });
+
+    // Switch to high quality for the video in the main view
+    if (remoteUid > 0) {
+      agoraManager.setVideoQuality(remoteUid, true);
     }
   }
 

@@ -43,8 +43,8 @@ class AuthenticationWorkflowScreenState extends State<AuthenticationWorkflowScre
           body: ListView(
             padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 4),
             children: [
-              mainVideoView(), // Widget for local video
-              scrollVideoView(), // Widget for Remote video
+              mainVideoView(), // The main video frame
+              scrollVideoView(), // Scroll view with multiple videos
               radioButtons(), // Choose host or audience
               const SizedBox(height: 5),
               SizedBox(
