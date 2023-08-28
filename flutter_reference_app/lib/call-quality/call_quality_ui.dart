@@ -8,7 +8,8 @@ import 'package:agora_rtc_engine/agora_rtc_engine.dart';
 class CallQualityScreen extends StatefulWidget {
   final ProductName selectedProduct;
 
-  const CallQualityScreen({Key? key, required this.selectedProduct}) : super(key: key);
+  const CallQualityScreen({Key? key, required this.selectedProduct})
+      : super(key: key);
 
   @override
   CallQualityScreenState createState() => CallQualityScreenState();
@@ -48,16 +49,21 @@ class CallQualityScreenState extends State<CallQualityScreen> with UiHelper {
               SizedBox(
                 height: 40,
                 child: ElevatedButton(
-                  onPressed:
-                      agoraManager.isJoined ? () => {leave()} : () => {join()},
+                  onPressed: isEchoTestRunning
+                      ? null // Disable the button
+                      : agoraManager.isJoined
+                      ? () => leave()
+                      : () => join(),
                   child: Text(agoraManager.isJoined ? "Leave" : "Join"),
                 ),
               ),
               ElevatedButton(
+                onPressed: agoraManager.isJoined
+                    ? null // Disable the button
+                    : () => echoTest(),
                 child: isEchoTestRunning
                     ? const Text("Stop Echo Test")
                     : const Text("Start Echo Test"),
-                onPressed: () => {echoTest()},
               ),
               const SizedBox(height: 8),
               _networkStatus(),
@@ -67,7 +73,19 @@ class CallQualityScreenState extends State<CallQualityScreen> with UiHelper {
   }
 
   void echoTest() {
-
+    if (isEchoTestRunning) {
+      agoraManager.stopEchoTest();
+      setState(() {
+        isEchoTestRunning = false;
+        mainViewUid = -1;
+      });
+    } else {
+      agoraManager.startEchoTest();
+      setState(() {
+        isEchoTestRunning = true;
+        mainViewUid = 0;
+      });
+    }
   }
 
   Widget _networkStatus() {
@@ -168,13 +186,13 @@ class CallQualityScreenState extends State<CallQualityScreen> with UiHelper {
 
       case 'onRemoteVideoStats':
         RemoteVideoStats stats = eventArgs["stats"];
-          setState(() {
-            if (mainViewUid == stats.uid) {
-              videoCaption = agoraManager.remoteVideoStatsSummary;
-            } else {
-              videoCaption = "";
-            }
-          });
+        setState(() {
+          if (mainViewUid == stats.uid) {
+            videoCaption = agoraManager.remoteVideoStatsSummary;
+          } else {
+            videoCaption = "";
+          }
+        });
         break;
 
       case 'onLastmileQuality':
@@ -203,11 +221,11 @@ class CallQualityScreenState extends State<CallQualityScreen> with UiHelper {
       agoraManager.setVideoQuality(mainViewUid, false);
     }
 
-   setState(() {
-     // Switch video
-     mainViewUid = remoteUid;
-     videoCaption = "";
-   });
+    setState(() {
+      // Switch video
+      mainViewUid = remoteUid;
+      videoCaption = "";
+    });
 
     // Switch to high quality for the video in the main view
     if (remoteUid > 0) {

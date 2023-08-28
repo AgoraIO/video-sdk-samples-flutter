@@ -169,6 +169,39 @@ class AgoraManagerCallQuality extends AgoraManagerAuthentication {
     );
   }
 
+  void startEchoTest() async {
+    //if (agoraEngine == null) setupAgoraEngine()
+    // Set test configuration parameters
+
+    String token;
+    if (config['serverUrl'].toString().contains('http')){
+      // Use the uid 0xFFFFFFFF to get a token for the test
+      token = await fetchToken(0xFFFFFFFF, config['channelName']);
+    } else {
+      token = config['rtcToken'];
+    }
+
+    AgoraVideoView view = localVideoView();
+
+    EchoTestConfiguration echoConfig = EchoTestConfiguration(
+      enableAudio: true,
+      enableVideo: true,
+      channelId: config['channelName'],
+      intervalInSeconds: 2, // Interval  between recording and playback
+      token: token,
+        view: view.hashCode
+    );
+
+
+    // Start the echo test
+    agoraEngine.startEchoTest(echoConfig);
+}
+
+  void stopEchoTest() {
+    agoraEngine.stopEchoTest();
+    //destroyAgoraEngine();
+  }
+
   void setVideoQuality(int remoteUid, bool isHighQuality) {
     if (isHighQuality) {
       agoraEngine.setRemoteVideoStreamType(uid: remoteUid,

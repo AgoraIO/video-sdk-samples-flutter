@@ -4,7 +4,6 @@ import 'dart:convert';
 import 'package:flutter/services.dart';
 import 'package:agora_rtc_engine/agora_rtc_engine.dart';
 import 'package:permission_handler/permission_handler.dart';
-import 'package:flutter/material.dart';
 
 enum ProductName {
   videoCalling,
@@ -70,7 +69,7 @@ class AgoraManager {
     return AgoraVideoView(
       controller: VideoViewController(
         rtcEngine: agoraEngine,
-        canvas: const VideoCanvas(uid: 0), // always set uid = 0 for local view
+        canvas: const VideoCanvas(uid: 0), // Always set uid = 0 for local view
       ),
     );
   }
@@ -91,6 +90,11 @@ class AgoraManager {
         eventCallback("onConnectionStateChanged", eventArgs);
       },
       onJoinChannelSuccess: (RtcConnection connection, int elapsed) {
+      /*  if (connection.localUid == 0xFFFFFFFF) { // exclude the echo test uid
+          return;
+        } else {
+          isJoined = true;
+        } */
         isJoined = true;
         messageCallback(
             "Local user uid:${connection.localUid} joined the channel");
@@ -169,5 +173,6 @@ class AgoraManager {
   Future<void> dispose() async {
     await leave();
     agoraEngine.release();
+    //agoraEngine = null;
   }
 }
