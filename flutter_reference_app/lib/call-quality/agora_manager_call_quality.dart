@@ -38,21 +38,21 @@ class AgoraManagerCallQuality extends AgoraManagerAuthentication {
   }
 
   @override
-  Future<void> setupVideoSDKEngine() async {
+  Future<void> setupAgoraEngine() async {
     // Retrieve or request camera and microphone permissions
     await [Permission.microphone, Permission.camera].request();
 
     // Create an instance of the Agora engine
     agoraEngine = createAgoraRtcEngine();
-    await agoraEngine.initialize(RtcEngineContext(appId: config['appId']));
+    await agoraEngine!.initialize(RtcEngineContext(appId: appId));
 
-    await agoraEngine.enableVideo();
+    await agoraEngine!.enableVideo();
 
     // Enable the dual stream mode
-    agoraEngine.enableDualStreamMode(enabled: true);
+    agoraEngine!.enableDualStreamMode(enabled: true);
 
     // Set audio profile and audio scenario.
-    agoraEngine.setAudioProfile(
+    agoraEngine!.setAudioProfile(
         profile: AudioProfileType.audioProfileDefault,
         scenario: AudioScenarioType.audioScenarioChatroom);
 
@@ -66,13 +66,13 @@ class AgoraManagerCallQuality extends AgoraManagerAuthentication {
         degradationPreference: DegradationPreference.maintainBalanced);
 
     // Apply the configuration
-    agoraEngine.setVideoEncoderConfiguration(videoConfig);
+    agoraEngine!.setVideoEncoderConfiguration(videoConfig);
 
     // Start the probe test
     startProbeTest();
 
     // Register the event handler
-    agoraEngine.registerEventHandler(getEventHandler());
+    agoraEngine!.registerEventHandler(getEventHandler());
   }
 
   void startProbeTest() {
@@ -83,7 +83,7 @@ class AgoraManagerCallQuality extends AgoraManagerAuthentication {
       expectedUplinkBitrate: 100000,  // Range 100000-5000000 bps
       expectedDownlinkBitrate: 100000, // Range 100000-5000000 bps
     );
-    agoraEngine.startLastmileProbeTest(config);
+    agoraEngine!.startLastmileProbeTest(config);
     messageCallback("Running the last mile probe test ...");
   }
 
@@ -103,7 +103,7 @@ class AgoraManagerCallQuality extends AgoraManagerAuthentication {
         eventCallback("onLastmileQuality", eventArgs);
       },
       onLastmileProbeResult: (LastmileProbeResult result) {
-        agoraEngine.stopLastmileProbeTest();
+        agoraEngine!.stopLastmileProbeTest();
         // The result object contains the detailed test results that help you
         // manage call quality, for example, the down link jitter.
         messageCallback("Downlink jitter: ${result.downlinkReport?.jitter}");
@@ -158,6 +158,18 @@ class AgoraManagerCallQuality extends AgoraManagerAuthentication {
         super.getEventHandler().onTokenPrivilegeWillExpire!(connection, token);
       },
       onJoinChannelSuccess: (RtcConnection connection, int elapsed) {
+        if (connection.localUid == 0xFFFFFFFF) { // Echo test started
+          messageCallback("Audio echo test started");
+          return;
+        } else { // Joined a channel
+          isJoined = true;
+        }
+        messageCallback(
+            "Local user uid:${connection.localUid} joined the channel");
+        Map<String, dynamic> eventArgs = {};
+        eventArgs["connection"] = connection;
+        eventArgs["elapsed"] = elapsed;
+        eventCallback("onJoinChannelSuccess", eventArgs);
         super.getEventHandler().onJoinChannelSuccess!(connection, elapsed);
       },
       onUserJoined: (RtcConnection connection, int remoteUid, int elapsed) {
@@ -170,43 +182,42 @@ class AgoraManagerCallQuality extends AgoraManagerAuthentication {
   }
 
   void startEchoTest() async {
-    //if (agoraEngine == null) setupAgoraEngine()
-    // Set test configuration parameters
+    if (agoraEngine == null) setupAgoraEngine();
 
+    // Get a token for the test
     String token;
     if (config['serverUrl'].toString().contains('http')){
       // Use the uid 0xFFFFFFFF to get a token for the test
-      token = await fetchToken(0xFFFFFFFF, config['channelName']);
+      token = await fetchToken(0xFFFFFFFF, channelName);
     } else {
       token = config['rtcToken'];
     }
 
-    //AgoraVideoView view = localVideoView();
-
+    // Set test configuration parameters
     EchoTestConfiguration echoConfig = EchoTestConfiguration(
       enableAudio: true,
       enableVideo: true,
-      channelId: config['channelName'],
+      channelId: channelName,
       intervalInSeconds: 2, // Interval  between recording and playback
       token: token,
-      //view: 0xFFFFFFFF
     );
 
     // Start the echo test
-    agoraEngine.startEchoTest(echoConfig);
+    agoraEngine!.startEchoTest(echoConfig);
 }
 
   void stopEchoTest() {
-    agoraEngine.stopEchoTest();
-    //destroyAgoraEngine();
+    agoraEngine!.stopEchoTest();
+    localUid = config['uid'];
+    destroyAgoraEngine();
   }
 
   void setVideoQuality(int remoteUid, bool isHighQuality) {
     if (isHighQuality) {
-      agoraEngine.setRemoteVideoStreamType(uid: remoteUid,
+      agoraEngine!.setRemoteVideoStreamType(uid: remoteUid,
           streamType: VideoStreamType.videoStreamHigh);
     } else {
-      agoraEngine.setRemoteVideoStreamType(uid: remoteUid,
+      agoraEngine!.setRemoteVideoStreamType(uid: remoteUid,
           streamType: VideoStreamType.videoStreamLow);
     }
   }

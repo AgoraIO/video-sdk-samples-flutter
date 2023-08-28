@@ -15,10 +15,12 @@ enum ProductName {
 class AgoraManager {
   late Map<String, dynamic> config;
   ProductName currentProduct = ProductName.videoCalling;
+  int localUid = -1;
+  String appId ="", channelName = "";
   List<int> remoteUids = []; // Uids of remote users in the channel
   bool isJoined = false; // Indicates if the local user has joined the channel
   bool isBroadcaster = true; // Client role
-  late RtcEngine agoraEngine; // Agora engine instance
+  RtcEngine? agoraEngine; // Agora engine instance
 
   Function(String message) messageCallback;
   Function(String eventName, Map<String, dynamic> eventArgs) eventCallback;
@@ -50,6 +52,9 @@ class AgoraManager {
       String configString = await rootBundle
           .loadString('assets/config/config.json');
       config = jsonDecode(configString);
+      appId = config["appId"];
+      channelName = config["channelName"];
+      localUid = config["uid"];
     } catch (e) {
       messageCallback(e.toString());
     }
@@ -58,9 +63,9 @@ class AgoraManager {
   AgoraVideoView remoteVideoView(int remoteUid) {
     return AgoraVideoView(
       controller: VideoViewController.remote(
-        rtcEngine: agoraEngine,
+        rtcEngine: agoraEngine!,
         canvas: VideoCanvas(uid: remoteUid),
-        connection: RtcConnection(channelId: config['channelName']),
+        connection: RtcConnection(channelId: channelName),
       ),
     );
   }
@@ -68,7 +73,7 @@ class AgoraManager {
   AgoraVideoView localVideoView() {
     return AgoraVideoView(
       controller: VideoViewController(
-        rtcEngine: agoraEngine,
+        rtcEngine: agoraEngine!,
         canvas: const VideoCanvas(uid: 0), // Always set uid = 0 for local view
       ),
     );
@@ -90,11 +95,7 @@ class AgoraManager {
         eventCallback("onConnectionStateChanged", eventArgs);
       },
       onJoinChannelSuccess: (RtcConnection connection, int elapsed) {
-        //if (connection.localUid == 0xFFFFFFFF) { // exclude the echo test uid
-        //  return;
-        //} else {
-          isJoined = true;
-        //}
+        isJoined = true;
         messageCallback(
             "Local user uid:${connection.localUid} joined the channel");
         Map<String, dynamic> eventArgs = {};
@@ -124,18 +125,20 @@ class AgoraManager {
     );
   }
 
-  Future<void> setupVideoSDKEngine() async {
+  Future<void> setupAgoraEngine() async {
     // Retrieve or request camera and microphone permissions
     await [Permission.microphone, Permission.camera].request();
 
     // Create an instance of the Agora engine
     agoraEngine = createAgoraRtcEngine();
-    await agoraEngine.initialize(RtcEngineContext(appId: config['appId']));
+    await agoraEngine!.initialize(RtcEngineContext(appId: appId));
 
-    await agoraEngine.enableVideo();
+    if (currentProduct != ProductName.voiceCalling) {
+      await agoraEngine!.enableVideo();
+    }
 
     // Register the event handler
-    agoraEngine.registerEventHandler(getEventHandler());
+    agoraEngine!.registerEventHandler(getEventHandler());
   }
 
   Future<void> join({
@@ -144,18 +147,20 @@ class AgoraManager {
     int uid = -1,
     ClientRoleType clientRole = ClientRoleType.clientRoleBroadcaster,
   }) async {
-    channelName = (channelName.isEmpty) ? config['channelName'] : channelName;
+    channelName = (channelName.isEmpty) ? this.channelName : channelName;
     token = (token.isEmpty) ? config['rtcToken'] : token;
-    uid = (uid == -1) ? config['uid'] : uid;
+    uid = (uid == -1) ? localUid : uid;
 
-    await agoraEngine.startPreview();
+    if (agoraEngine == null) await setupAgoraEngine();
+
+    await agoraEngine!.startPreview();
     // Set channel options including the client role and channel profile
     ChannelMediaOptions options = ChannelMediaOptions(
       clientRoleType: clientRole,
       channelProfile: ChannelProfileType.channelProfileCommunication,
     );
 
-    await agoraEngine.joinChannel(
+    await agoraEngine!.joinChannel(
       token: token,
       channelId: channelName,
       options: options,
@@ -166,12 +171,20 @@ class AgoraManager {
   Future<void> leave() async {
     remoteUids.clear();
     isJoined = false;
-    await agoraEngine.leaveChannel();
+    await agoraEngine!.leaveChannel();
+    // Destroy the engine instance
+    destroyAgoraEngine();
+  }
+
+  void destroyAgoraEngine() {
+    // Release the RtcEngine instance to free up resources
+    agoraEngine!.release();
+    agoraEngine = null;
   }
 
   Future<void> dispose() async {
     await leave();
-    agoraEngine.release();
-    //agoraEngine = null;
+    agoraEngine!.release();
+    agoraEngine = null;
   }
 }

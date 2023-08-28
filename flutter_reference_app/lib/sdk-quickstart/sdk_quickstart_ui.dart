@@ -71,7 +71,6 @@ class SDKQuickstartScreenState extends State<SDKQuickstartScreen> with UiHelper 
       messageCallback: showMessage,
       eventCallback: eventCallback,
     );
-    await agoraManager.setupVideoSDKEngine();
 
     setState(() {
       initializeUiHelper(agoraManager, setStateCallback);

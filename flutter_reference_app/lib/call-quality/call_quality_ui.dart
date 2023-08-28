@@ -77,7 +77,7 @@ class CallQualityScreenState extends State<CallQualityScreen> with UiHelper {
       agoraManager.stopEchoTest();
       setState(() {
         isEchoTestRunning = false;
-        mainViewUid = -1;
+        //mainViewUid = -1;
       });
     } else {
       agoraManager.startEchoTest();
@@ -124,7 +124,6 @@ class CallQualityScreenState extends State<CallQualityScreen> with UiHelper {
       messageCallback: showMessage,
       eventCallback: eventCallback,
     );
-    await agoraManager.setupVideoSDKEngine();
 
     setState(() {
       initializeUiHelper(agoraManager, setStateCallback);

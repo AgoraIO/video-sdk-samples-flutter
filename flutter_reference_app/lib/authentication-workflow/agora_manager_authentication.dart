@@ -34,7 +34,7 @@ class AgoraManagerAuthentication extends AgoraManager {
   Future<void> fetchTokenAndJoin(channelName) async {
     // Retrieve a token from the server
     try {
-      config['rtcToken'] = await fetchToken(config['uid'], channelName);
+      config['rtcToken'] = await fetchToken(localUid, channelName);
       // Proceed with token usage or further operations
     } catch (e) {
       // Handle the exception or display an error message
@@ -65,8 +65,8 @@ class AgoraManagerAuthentication extends AgoraManager {
       Map<String, dynamic> json = jsonDecode(response.body);
       String newToken = json['rtcToken'];
       // Update the config
-      config['channelName'] = channelName;
-      config['uid'] = uid;
+      this.channelName = channelName;
+      localUid = uid;
       // Use the token to join a channel or renew an expiring token
       return newToken;
     } else {
@@ -80,7 +80,7 @@ class AgoraManagerAuthentication extends AgoraManager {
     // Retrieve a token from the server
     String token;
     try {
-      token = await fetchToken(config['uid'], config['channelName']);
+      token = await fetchToken(localUid, channelName);
       // Proceed with token usage or further operations
     } catch (e) {
       // Handle the exception or display an error message
@@ -89,7 +89,7 @@ class AgoraManagerAuthentication extends AgoraManager {
     }
 
     // Renew the token
-    agoraEngine.renewToken(token);
+    agoraEngine!.renewToken(token);
     messageCallback("Token renewed");
   }
 
@@ -122,17 +122,17 @@ class AgoraManagerAuthentication extends AgoraManager {
 
   Future<void> joinChannelWithToken([String? channelName]) async {
     String token='';
-    channelName ??= config['channelName'];
+    channelName ??= this.channelName;
 
     if (isValidURL(config['serverUrl'])) { // A valid server url is available
       // Retrieve a token from the server
-      token = await fetchToken(config['uid'], channelName!);
+      token = await fetchToken(localUid, channelName);
     } else { // use the token from the config.json file
       token = config['rtcToken'];
     }
 
     return join(
-        channelName: channelName!,
+        channelName: channelName,
         token: token,
         clientRole: (isBroadcaster) ? ClientRoleType.clientRoleBroadcaster : ClientRoleType.clientRoleAudience
     );

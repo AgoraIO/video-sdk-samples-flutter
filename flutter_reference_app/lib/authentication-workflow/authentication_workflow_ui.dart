@@ -83,7 +83,6 @@ class AuthenticationWorkflowScreenState extends State<AuthenticationWorkflowScre
       messageCallback: showMessage,
       eventCallback: eventCallback,
     );
-    await agoraManager.setupVideoSDKEngine();
 
     setState(() {
       initializeUiHelper(agoraManager, setStateCallback);
