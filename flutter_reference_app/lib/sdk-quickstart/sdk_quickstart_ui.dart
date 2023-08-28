@@ -102,14 +102,11 @@ class SDKQuickstartScreenState extends State<SDKQuickstartScreen> with UiHelper 
         break;
 
       case 'onUserJoined':
-        setState(() {});
+        onUserJoined(eventArgs["remoteUid"]);
         break;
 
       case 'onUserOffline':
-        if (mainViewUid == eventArgs["remoteUid"]){
-          mainViewUid = -1;
-        }
-        setState(() {});
+        onUserOffline(eventArgs["remoteUid"]);
         break;
 
       default:

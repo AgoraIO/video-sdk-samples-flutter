@@ -46,7 +46,9 @@ class AgoraManagerCallQuality extends AgoraManagerAuthentication {
     agoraEngine = createAgoraRtcEngine();
     await agoraEngine!.initialize(RtcEngineContext(appId: appId));
 
-    await agoraEngine!.enableVideo();
+    if (currentProduct != ProductName.voiceCalling) {
+      await agoraEngine!.enableVideo();
+    }
 
     // Enable the dual stream mode
     agoraEngine!.enableDualStreamMode(enabled: true);

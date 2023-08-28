@@ -127,11 +127,11 @@ class AuthenticationWorkflowScreenState extends State<AuthenticationWorkflowScre
         break;
 
       case 'onUserJoined':
-        setState(() {});
+        onUserJoined(eventArgs["remoteUid"]);
         break;
 
       case 'onUserOffline':
-        setState(() {});
+        onUserOffline(eventArgs["remoteUid"]);
         break;
     }
   }

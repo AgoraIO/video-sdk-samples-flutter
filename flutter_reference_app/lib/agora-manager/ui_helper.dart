@@ -22,10 +22,14 @@ class UiHelper {
 
   // Display local video preview
   Widget mainVideoView() {
-    if (_agoraManager.isJoined && _agoraManager.isBroadcaster) {
-      if (mainViewUid == -1) {
+    if (_agoraManager.currentProduct == ProductName.voiceCalling) {
+      return Container();
+    } else if (_agoraManager.isJoined) {
+      if (mainViewUid == -1 && _agoraManager.isBroadcaster) {
         // Initialize local video in the main view
         mainViewUid = 0;
+      } else if (mainViewUid == -1) {
+        return textContainer("Waiting for a host to join", 240);
       }
       return Container(
           height: 240,
@@ -35,45 +39,46 @@ class UiHelper {
               child: mainViewUid == 0
                   ? _agoraManager.localVideoView()
                   : _agoraManager.remoteVideoView(mainViewUid)));
-    } else if (!_agoraManager.isBroadcaster &&
-        (_agoraManager.currentProduct == ProductName.interactiveLiveStreaming ||
-            _agoraManager.currentProduct == ProductName.broadcastStreaming)) {
-      return Container();
     } else {
-      return Container(
-          height: 240,
-          decoration: BoxDecoration(border: Border.all()),
-          margin: const EdgeInsets.only(bottom: 5),
-          child: const Center(
-              child: Text('Join a channel', textAlign: TextAlign.center)));
+      return textContainer('Join a channel', 240);
     }
   }
 
-// Display remote user's video
+  Widget textContainer(String text, double height) {
+    return Container(
+        height: height,
+        decoration: BoxDecoration(border: Border.all()),
+        margin: const EdgeInsets.only(bottom: 5),
+        child: Center(child: Text(text, textAlign: TextAlign.center)));
+  }
+
+  // Display remote user's video
   Widget scrollVideoView() {
-    if (_agoraManager == null) {
+    if (_agoraManager == null
+        || _agoraManager.currentProduct != ProductName.videoCalling) {
       return Container();
     } else if (_agoraManager.remoteUids.isEmpty) {
-      return Container(
-          height: 120,
-          decoration: BoxDecoration(border: Border.all()),
-          child: Center(
-              child: Text(
-                  _agoraManager.isJoined
-                      ? 'Waiting for a remote user to join'
-                      : 'Join a channel',
-                  textAlign: TextAlign.center)));
+      return textContainer(
+          _agoraManager.isJoined
+              ? 'Waiting for a remote user to join'
+              : 'Join a channel',
+          120);
     } else if (_agoraManager.isBroadcaster &&
         (_agoraManager.currentProduct == ProductName.interactiveLiveStreaming ||
             _agoraManager.currentProduct == ProductName.broadcastStreaming)) {
       return Container();
     }
 
+    if (_agoraManager.agoraEngine == null) return textContainer("", 240);
+
     // Create a list of Uids for videos in the scroll view
     scrollViewUids.clear();
     scrollViewUids.addAll(_agoraManager.remoteUids);
-    scrollViewUids.remove(mainViewUid); // This video is displayed in the main view
-    if (mainViewUid > 0) scrollViewUids.add(0); // Add local video to scroll view
+    scrollViewUids
+        .remove(mainViewUid); // This video is displayed in the main view
+    if (mainViewUid > 0) {
+      scrollViewUids.add(0); // Add local video to scroll view
+    }
 
     return Container(
       height: 120, // Set the desired height
@@ -82,18 +87,18 @@ class UiHelper {
         scrollDirection: Axis.horizontal,
         itemCount: scrollViewUids.length,
         itemBuilder: (context, index) {
-          final Uid = scrollViewUids[index]; // Get the remoteUid
+          final uid = scrollViewUids[index]; // Get the remoteUid
           return GestureDetector(
             onTap: () {
               // Handle the onTap event for the container
-              handleContainerTap(Uid);
+              handleVideoTap(uid);
             },
             child: Container(
               width: 120, // Set the desired width
               margin: const EdgeInsets.fromLTRB(0, 3, 5, 3),
-              child: Uid == 0
+              child: uid == 0
                   ? _agoraManager.localVideoView()
-                  : _agoraManager.remoteVideoView(Uid),
+                  : _agoraManager.remoteVideoView(uid),
             ),
           );
         },
@@ -101,7 +106,7 @@ class UiHelper {
     );
   }
 
-  void handleContainerTap(int remoteUid) {
+  void handleVideoTap(int remoteUid) {
     mainViewUid = remoteUid;
     _setStateCallback();
   }
@@ -129,11 +134,24 @@ class UiHelper {
     }
   }
 
+  void onUserOffline(int remoteUid) {
+    if (mainViewUid == remoteUid) {
+      mainViewUid = -1;
+    }
+    _setStateCallback();
+  }
+
+  void onUserJoined(int remoteUid) {
+    if (!_agoraManager.isBroadcaster) {
+      mainViewUid = remoteUid;
+    }
+    _setStateCallback();
+  }
+
   // Set the client role when a radio button is selected
   void _handleRadioValueChange(bool? value) async {
     _agoraManager.isBroadcaster = (value == true);
     _setStateCallback();
     if (_agoraManager.isJoined) leave();
   }
-
 }

@@ -194,19 +194,25 @@ class CallQualityScreenState extends State<CallQualityScreen> with UiHelper {
         });
         break;
 
+      case 'onUserJoined':
+        onUserJoined(eventArgs["remoteUid"]);
+        break;
+
+      case 'onUserOffline':
+        onUserOffline(eventArgs["remoteUid"]);
+        break;
+
       case 'onJoinChannelSuccess':
       case 'onLastmileQuality':
       case 'onNetworkQuality':
-      case 'onUserJoined':
-      case 'onUserOffline':
         setState(() {});
         break;
     }
   }
 
   @override
-  void handleContainerTap(int remoteUid) {
-    // Switch to low quality for the video going out of the main view
+  void handleVideoTap(int remoteUid) {
+    // Switch to low quality for the remote video going out of the main view
     if (mainViewUid > 0) {
       agoraManager.setVideoQuality(mainViewUid, false);
     }
