@@ -83,7 +83,7 @@ class CallQualityScreenState extends State<CallQualityScreen> with UiHelper {
       agoraManager.startEchoTest();
       setState(() {
         isEchoTestRunning = true;
-        mainViewUid = 0;
+        //mainViewUid = 0;
       });
     }
   }
@@ -195,19 +195,10 @@ class CallQualityScreenState extends State<CallQualityScreen> with UiHelper {
         });
         break;
 
+      case 'onJoinChannelSuccess':
       case 'onLastmileQuality':
       case 'onNetworkQuality':
-        setState(() {});
-        break;
-
-      case 'onJoinChannelSuccess':
-        setState(() {});
-        break;
-
       case 'onUserJoined':
-        setState(() {});
-        break;
-
       case 'onUserOffline':
         setState(() {});
         break;

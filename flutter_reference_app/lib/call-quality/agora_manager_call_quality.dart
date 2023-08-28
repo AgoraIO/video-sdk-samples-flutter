@@ -181,7 +181,7 @@ class AgoraManagerCallQuality extends AgoraManagerAuthentication {
       token = config['rtcToken'];
     }
 
-    AgoraVideoView view = localVideoView();
+    //AgoraVideoView view = localVideoView();
 
     EchoTestConfiguration echoConfig = EchoTestConfiguration(
       enableAudio: true,
@@ -189,9 +189,8 @@ class AgoraManagerCallQuality extends AgoraManagerAuthentication {
       channelId: config['channelName'],
       intervalInSeconds: 2, // Interval  between recording and playback
       token: token,
-        view: view.hashCode
+      //view: 0xFFFFFFFF
     );
-
 
     // Start the echo test
     agoraEngine.startEchoTest(echoConfig);

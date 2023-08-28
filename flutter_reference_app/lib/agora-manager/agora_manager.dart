@@ -90,12 +90,11 @@ class AgoraManager {
         eventCallback("onConnectionStateChanged", eventArgs);
       },
       onJoinChannelSuccess: (RtcConnection connection, int elapsed) {
-      /*  if (connection.localUid == 0xFFFFFFFF) { // exclude the echo test uid
-          return;
-        } else {
+        //if (connection.localUid == 0xFFFFFFFF) { // exclude the echo test uid
+        //  return;
+        //} else {
           isJoined = true;
-        } */
-        isJoined = true;
+        //}
         messageCallback(
             "Local user uid:${connection.localUid} joined the channel");
         Map<String, dynamic> eventArgs = {};
