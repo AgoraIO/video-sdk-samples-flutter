@@ -189,7 +189,8 @@ class AgoraManagerCallQuality extends AgoraManagerAuthentication {
     // Get a token for the test
     String token;
     if (config['serverUrl'].toString().contains('http')){
-      // Use the uid 0xFFFFFFFF to get a token for the test
+      // Use the uid 0xFFFFFFFF to get a token for the echo test
+      // Ensure that the channel name is unique for each user when running the echo test
       token = await fetchToken(0xFFFFFFFF, channelName);
     } else {
       token = config['rtcToken'];
@@ -198,7 +199,7 @@ class AgoraManagerCallQuality extends AgoraManagerAuthentication {
     // Set test configuration parameters
     EchoTestConfiguration echoConfig = EchoTestConfiguration(
       enableAudio: true,
-      enableVideo: true,
+      enableVideo: false,
       channelId: channelName,
       intervalInSeconds: 2, // Interval  between recording and playback
       token: token,

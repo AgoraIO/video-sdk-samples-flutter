@@ -33,7 +33,7 @@ class SDKQuickstartScreenState extends State<SDKQuickstartScreen> with UiHelper 
       scaffoldMessengerKey: scaffoldMessengerKey,
       home: Scaffold(
           appBar: AppBar(
-            title: const Text('Video SDK Quickstart'),
+            title: const Text('SDK quickstart'),
           ),
           body: ListView(
             padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 4),

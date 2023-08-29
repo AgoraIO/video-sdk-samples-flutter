@@ -38,7 +38,7 @@ class AuthenticationWorkflowScreenState extends State<AuthenticationWorkflowScre
       scaffoldMessengerKey: scaffoldMessengerKey,
       home: Scaffold(
           appBar: AppBar(
-            title: const Text('Authentication workflow'),
+            title: const Text('Secure authentication with tokens'),
           ),
           body: ListView(
             padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 4),

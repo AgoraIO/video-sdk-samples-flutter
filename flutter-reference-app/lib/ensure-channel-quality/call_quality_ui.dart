@@ -37,7 +37,7 @@ class CallQualityScreenState extends State<CallQualityScreen> with UiHelper {
       scaffoldMessengerKey: scaffoldMessengerKey,
       home: Scaffold(
           appBar: AppBar(
-            title: const Text('Call quality'),
+            title: const Text('Call quality best practice'),
           ),
           body: ListView(
             padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 4),
@@ -129,6 +129,9 @@ class CallQualityScreenState extends State<CallQualityScreen> with UiHelper {
       initializeUiHelper(agoraManager, setStateCallback);
       isAgoraManagerInitialized = true;
     });
+
+    // Start the probe test
+
   }
 
   Future<void> join() async {
