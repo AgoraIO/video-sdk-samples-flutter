@@ -1,28 +1,23 @@
 import 'dart:async';
-import 'package:flutter_reference_app/authentication-workflow/agora_manager_authentication.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_reference_app/agora-manager/agora_manager.dart';
 import 'package:flutter_reference_app/agora-manager/ui_helper.dart';
 import 'package:agora_rtc_engine/agora_rtc_engine.dart';
 
-class AuthenticationWorkflowScreen extends StatefulWidget {
+class SDKQuickstartScreen extends StatefulWidget {
   final ProductName selectedProduct;
 
-  const AuthenticationWorkflowScreen({Key? key, required this.selectedProduct}) : super(key: key);
+  const SDKQuickstartScreen({Key? key, required this.selectedProduct}) : super(key: key);
 
   @override
-  AuthenticationWorkflowScreenState createState() => AuthenticationWorkflowScreenState();
+  SDKQuickstartScreenState createState() => SDKQuickstartScreenState();
 }
 
-class AuthenticationWorkflowScreenState extends State<AuthenticationWorkflowScreen> with UiHelper {
-  late AgoraManagerAuthentication agoraManager;
+class SDKQuickstartScreenState extends State<SDKQuickstartScreen> with UiHelper {
+  late AgoraManager agoraManager;
   bool isAgoraManagerInitialized = false;
   final GlobalKey<ScaffoldMessengerState> scaffoldMessengerKey =
       GlobalKey<ScaffoldMessengerState>(); // Global key to access the scaffold
-  final channelTextController =
-      TextEditingController(text: ''); // To access the channel name
-  final serverUrlTextController =
-      TextEditingController(text: 'URL'); // To access the Url
 
   // Build UI
   @override
@@ -38,7 +33,7 @@ class AuthenticationWorkflowScreenState extends State<AuthenticationWorkflowScre
       scaffoldMessengerKey: scaffoldMessengerKey,
       home: Scaffold(
           appBar: AppBar(
-            title: const Text('Authentication workflow'),
+            title: const Text('Video SDK Quickstart'),
           ),
           body: ListView(
             padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 4),
@@ -55,16 +50,6 @@ class AuthenticationWorkflowScreenState extends State<AuthenticationWorkflowScre
                   child: Text(agoraManager.isJoined ? "Leave" : "Join"),
                 ),
               ),
-              TextField(
-                controller: serverUrlTextController,
-                decoration: const InputDecoration(
-                    hintText: 'Token server URL'),
-              ),
-              TextField(
-                controller: channelTextController,
-                decoration: const InputDecoration(
-                    hintText: 'Type the channel name here'),
-              ),
             ],
           )),
     );
@@ -72,13 +57,13 @@ class AuthenticationWorkflowScreenState extends State<AuthenticationWorkflowScre
 
   @override
   void initState() {
-    super.initState();
     initialize();
+    super.initState();
   }
 
   Future<void> initialize() async {
     // Set up an instance of AgoraManager
-    agoraManager = await AgoraManagerAuthentication.create(
+    agoraManager = await AgoraManager.create(
       currentProduct: widget.selectedProduct,
       messageCallback: showMessage,
       eventCallback: eventCallback,
@@ -87,27 +72,17 @@ class AuthenticationWorkflowScreenState extends State<AuthenticationWorkflowScre
     setState(() {
       initializeUiHelper(agoraManager, setStateCallback);
       isAgoraManagerInitialized = true;
-      channelTextController.text=agoraManager.config['channelName'];
-      serverUrlTextController.text=agoraManager.config['serverUrl'];
     });
   }
 
   Future<void> join() async {
-    agoraManager.config['serverUrl'] = serverUrlTextController.text;
-    String channelName = channelTextController.text;
-    if (channelName.isEmpty) {
-      showMessage("Enter a channel name");
-      return;
-    } else {
-      showMessage("Fetching a token ...");
-    }
-    await agoraManager.fetchTokenAndJoin(channelName);
+    await agoraManager.join();
   }
 
   // Release the resources when you leave
   @override
   Future<void> dispose() async {
-    await agoraManager.dispose();
+    agoraManager.dispose();
     super.dispose();
   }
 
@@ -132,6 +107,11 @@ class AuthenticationWorkflowScreenState extends State<AuthenticationWorkflowScre
 
       case 'onUserOffline':
         onUserOffline(eventArgs["remoteUid"]);
+        break;
+
+      default:
+        // Handle unknown event or provide a default case
+        showMessage('Event Name: $eventName, Event Args: $eventArgs');
         break;
     }
   }

@@ -170,21 +170,26 @@ class AgoraManager {
 
   Future<void> leave() async {
     remoteUids.clear();
+    if (agoraEngine != null) {
+      await agoraEngine!.leaveChannel();
+    }
     isJoined = false;
-    await agoraEngine!.leaveChannel();
     // Destroy the engine instance
     destroyAgoraEngine();
   }
 
   void destroyAgoraEngine() {
     // Release the RtcEngine instance to free up resources
-    agoraEngine!.release();
-    agoraEngine = null;
+    if (agoraEngine != null) {
+      agoraEngine!.release();
+      agoraEngine = null;
+    }
   }
 
   Future<void> dispose() async {
-    await leave();
-    agoraEngine!.release();
-    agoraEngine = null;
+    if (isJoined) {
+      await leave();
+    }
+    destroyAgoraEngine();
   }
 }

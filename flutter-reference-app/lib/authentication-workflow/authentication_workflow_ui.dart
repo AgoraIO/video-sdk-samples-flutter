@@ -1,23 +1,28 @@
 import 'dart:async';
+import 'package:flutter_reference_app/authentication-workflow/agora_manager_authentication.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_reference_app/agora-manager/agora_manager.dart';
 import 'package:flutter_reference_app/agora-manager/ui_helper.dart';
 import 'package:agora_rtc_engine/agora_rtc_engine.dart';
 
-class SDKQuickstartScreen extends StatefulWidget {
+class AuthenticationWorkflowScreen extends StatefulWidget {
   final ProductName selectedProduct;
 
-  const SDKQuickstartScreen({Key? key, required this.selectedProduct}) : super(key: key);
+  const AuthenticationWorkflowScreen({Key? key, required this.selectedProduct}) : super(key: key);
 
   @override
-  SDKQuickstartScreenState createState() => SDKQuickstartScreenState();
+  AuthenticationWorkflowScreenState createState() => AuthenticationWorkflowScreenState();
 }
 
-class SDKQuickstartScreenState extends State<SDKQuickstartScreen> with UiHelper {
-  late AgoraManager agoraManager;
+class AuthenticationWorkflowScreenState extends State<AuthenticationWorkflowScreen> with UiHelper {
+  late AgoraManagerAuthentication agoraManager;
   bool isAgoraManagerInitialized = false;
   final GlobalKey<ScaffoldMessengerState> scaffoldMessengerKey =
       GlobalKey<ScaffoldMessengerState>(); // Global key to access the scaffold
+  final channelTextController =
+      TextEditingController(text: ''); // To access the channel name
+  final serverUrlTextController =
+      TextEditingController(text: 'URL'); // To access the Url
 
   // Build UI
   @override
@@ -33,7 +38,7 @@ class SDKQuickstartScreenState extends State<SDKQuickstartScreen> with UiHelper 
       scaffoldMessengerKey: scaffoldMessengerKey,
       home: Scaffold(
           appBar: AppBar(
-            title: const Text('Video SDK Quickstart'),
+            title: const Text('Authentication workflow'),
           ),
           body: ListView(
             padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 4),
@@ -50,6 +55,16 @@ class SDKQuickstartScreenState extends State<SDKQuickstartScreen> with UiHelper 
                   child: Text(agoraManager.isJoined ? "Leave" : "Join"),
                 ),
               ),
+              TextField(
+                controller: serverUrlTextController,
+                decoration: const InputDecoration(
+                    hintText: 'Token server URL'),
+              ),
+              TextField(
+                controller: channelTextController,
+                decoration: const InputDecoration(
+                    hintText: 'Type the channel name here'),
+              ),
             ],
           )),
     );
@@ -57,13 +72,13 @@ class SDKQuickstartScreenState extends State<SDKQuickstartScreen> with UiHelper 
 
   @override
   void initState() {
-    initialize();
     super.initState();
+    initialize();
   }
 
   Future<void> initialize() async {
     // Set up an instance of AgoraManager
-    agoraManager = await AgoraManager.create(
+    agoraManager = await AgoraManagerAuthentication.create(
       currentProduct: widget.selectedProduct,
       messageCallback: showMessage,
       eventCallback: eventCallback,
@@ -72,17 +87,27 @@ class SDKQuickstartScreenState extends State<SDKQuickstartScreen> with UiHelper 
     setState(() {
       initializeUiHelper(agoraManager, setStateCallback);
       isAgoraManagerInitialized = true;
+      channelTextController.text=agoraManager.config['channelName'];
+      serverUrlTextController.text=agoraManager.config['serverUrl'];
     });
   }
 
   Future<void> join() async {
-    await agoraManager.join();
+    agoraManager.config['serverUrl'] = serverUrlTextController.text;
+    String channelName = channelTextController.text;
+    if (channelName.isEmpty) {
+      showMessage("Enter a channel name");
+      return;
+    } else {
+      showMessage("Fetching a token ...");
+    }
+    await agoraManager.fetchTokenAndJoin(channelName);
   }
 
   // Release the resources when you leave
   @override
   Future<void> dispose() async {
-    await agoraManager.dispose();
+    agoraManager.dispose();
     super.dispose();
   }
 
@@ -107,11 +132,6 @@ class SDKQuickstartScreenState extends State<SDKQuickstartScreen> with UiHelper 
 
       case 'onUserOffline':
         onUserOffline(eventArgs["remoteUid"]);
-        break;
-
-      default:
-        // Handle unknown event or provide a default case
-        showMessage('Event Name: $eventName, Event Args: $eventArgs');
         break;
     }
   }

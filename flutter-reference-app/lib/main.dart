@@ -3,7 +3,7 @@ import 'package:flutter_reference_app/agora-manager/agora_manager.dart';
 import 'package:flutter_reference_app/agora-manager/ui_helper.dart';
 import 'package:flutter_reference_app/sdk-quickstart/sdk_quickstart_ui.dart';
 import 'package:flutter_reference_app/authentication-workflow/authentication_workflow_ui.dart';
-import 'package:flutter_reference_app/call-quality/call_quality_ui.dart';
+import 'package:flutter_reference_app/ensure-channel-quality/call_quality_ui.dart';
 
 void main() => runApp(const MaterialApp(home: MyApp()));
 

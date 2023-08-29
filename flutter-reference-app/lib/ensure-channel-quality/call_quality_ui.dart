@@ -1,6 +1,6 @@
 import 'dart:async';
 import 'package:flutter/material.dart';
-import 'package:flutter_reference_app/call-quality/agora_manager_call_quality.dart';
+import 'package:flutter_reference_app/ensure-channel-quality/agora_manager_call_quality.dart';
 import 'package:flutter_reference_app/agora-manager/agora_manager.dart';
 import 'package:flutter_reference_app/agora-manager/ui_helper.dart';
 import 'package:agora_rtc_engine/agora_rtc_engine.dart';
@@ -52,8 +52,8 @@ class CallQualityScreenState extends State<CallQualityScreen> with UiHelper {
                   onPressed: isEchoTestRunning
                       ? null // Disable the button
                       : agoraManager.isJoined
-                      ? () => leave()
-                      : () => join(),
+                          ? () => leave()
+                          : () => join(),
                   child: Text(agoraManager.isJoined ? "Leave" : "Join"),
                 ),
               ),
@@ -138,7 +138,7 @@ class CallQualityScreenState extends State<CallQualityScreen> with UiHelper {
   // Release the resources when you leave
   @override
   Future<void> dispose() async {
-    await agoraManager.dispose();
+    agoraManager.dispose();
     super.dispose();
   }
 

@@ -74,13 +74,6 @@ This demo app includes several examples that illustrate the functionality and fe
 - [SDK quickstart](flutter-reference-app/lib/agora-manager)
 - [Secure authentication with tokens](flutter-reference-app/lib/authentication-workflow)
 - [Call quality best practice](flutter-reference-app/lib/ensure-channel-quality)
-- [Connect through restricted networks with Cloud Proxy](flutter-reference-app/lib/cloud-proxy)
-- [Stream media to a channel](flutter-reference-app/lib/play-media)
-- [Secure channel encryption](flutter-reference-app/lib/media-stream-encryption)
-- [Screen share, volume control and mute](flutter-reference-app/lib/product-workflow)
-- [Custom video and audio sources](flutter-reference-app/lib/custom-video-and-audio)
-- [Raw video and audio processing](flutter-reference-app/lib/stream-raw-audio-and-video)
-- [Geofencing](flutter-reference-app/lib/geofencing)
 
 
 ## Contact
