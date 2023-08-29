@@ -42,10 +42,10 @@ Before getting started with this example app, please ensure you have the followi
     - `appId`: (Required) The unique ID for the application obtained from [Agora Console](https://console.agora.io). 
     - `channelName`: The default name of the channel to join.
     - `rtcToken`: An RTC (Real-Time Communication) token generated for the `channelName`. You can generate a temporary token using Agora Console.
-    - `serverUrl`: The URL for the token generator. See [Secure authentication with tokens](authentication-workflow) fpr information on how to set up a token server.
+    - `serverUrl`: The URL for the token generator. See [Secure authentication with tokens](authentication-workflow) for information on how to set up a token server.
     - `tokenExpiryTime`: The time in seconds after which a token expires.
 
-    If a valid `serverUrl` is provided, all examples use the token server to obtain a token except the **SDK quickstart** project that uses the `rtcToken`. If a `serverUrl` is not specified, all examples except **Secure authentication with tokens** use the `rtcToken` from `config.json`.
+    If a valid `serverUrl` is specified, all examples use the token server to obtain a token except the **SDK quickstart** project that uses the `rtcToken`. If a `serverUrl` is not specified, all examples except **Secure authentication with tokens** use the `rtcToken` from `config.json`.
 
 1. Launch Android Studio or the IDE of your choice. From the **File** menu, select **Open...** then choose the `flutter_reference_app` folder. 
 
@@ -69,7 +69,7 @@ Before getting started with this example app, please ensure you have the followi
 
 ## Examples
 
-This demo app includes several examples that illustrate the functionality and features of Agora Video/Voice SDK. Each example is self-contained and the relevant code can be found in its own folder in the root directory. For more information about each example, see the README file within the directory.
+This reference app includes several examples that illustrate the functionality and features of Agora Video/Voice SDK. Each example is self-contained and the relevant code can be found in its own folder in the [`lib`](flutter-reference-app/lib) directory. For more information about each example, see the README file within the directory.
 
 - [SDK quickstart](flutter-reference-app/lib/agora-manager)
 - [Secure authentication with tokens](flutter-reference-app/lib/authentication-workflow)

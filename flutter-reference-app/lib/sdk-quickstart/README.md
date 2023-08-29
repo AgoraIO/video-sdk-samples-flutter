@@ -6,7 +6,7 @@ This example shows the minimum code you need to integrate high-quality, low-late
 
 ## Understand the code
 
-The business logic for the Agora quickstart example can be found in the [`AgoraManager`](agora_manager.dart) class. This class encapsulates the code to set up an instance of `RTCEngine`, join, and leave a channel. All examples in this repository extend the `AgoraManager` class to add functionality specific for that application. For the UI implementation of this example, refer to [`sdk_quickstart_ui.dart`](../sdk-quickstart/sdk_quickstart_ui.dart) and [`ui_helper.dart`](ui_helper.dart).
+The business logic for the Agora quickstart example can be found in the [`AgoraManager`](../agora-manager/agora_manager.dart) class. This class encapsulates the code to set up an instance of `RTCEngine`, join, and leave a channel. All examples in this repository extend the `AgoraManager` class to add functionality specific for that application. For the UI implementation of this example, refer to [`sdk_quickstart_ui.dart`](sdk_quickstart_ui.dart) and [`ui_helper.dart`](../agora-manager/ui_helper.dart).
 
 For context on this implementation, and a full explanation of the essential code snippets used in this example, read the **SDK quickstart** document for your product of interest:
 
