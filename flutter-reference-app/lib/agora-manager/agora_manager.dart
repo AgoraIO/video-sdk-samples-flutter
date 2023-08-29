@@ -13,10 +13,10 @@ enum ProductName {
 }
 
 class AgoraManager {
-  late Map<String, dynamic> config;
   ProductName currentProduct = ProductName.videoCalling;
+  late Map<String, dynamic> config; // Configuration parameters
   int localUid = -1;
-  String appId ="", channelName = "";
+  String appId = "", channelName = "";
   List<int> remoteUids = []; // Uids of remote users in the channel
   bool isJoined = false; // Indicates if the local user has joined the channel
   bool isBroadcaster = true; // Client role
@@ -49,8 +49,8 @@ class AgoraManager {
 
   Future<void> initialize() async {
     try {
-      String configString = await rootBundle
-          .loadString('assets/config/config.json');
+      String configString =
+          await rootBundle.loadString('assets/config/config.json');
       config = jsonDecode(configString);
       appId = config["appId"];
       channelName = config["channelName"];
@@ -88,6 +88,7 @@ class AgoraManager {
           remoteUids.clear();
           isJoined = false;
         }
+        // Notify the UI
         Map<String, dynamic> eventArgs = {};
         eventArgs["connection"] = connection;
         eventArgs["state"] = state;
@@ -98,6 +99,7 @@ class AgoraManager {
         isJoined = true;
         messageCallback(
             "Local user uid:${connection.localUid} joined the channel");
+        // Notify the UI
         Map<String, dynamic> eventArgs = {};
         eventArgs["connection"] = connection;
         eventArgs["elapsed"] = elapsed;
@@ -106,6 +108,7 @@ class AgoraManager {
       onUserJoined: (RtcConnection connection, int remoteUid, int elapsed) {
         remoteUids.add(remoteUid);
         messageCallback("Remote user uid:$remoteUid joined the channel");
+        // Notify the UI
         Map<String, dynamic> eventArgs = {};
         eventArgs["connection"] = connection;
         eventArgs["remoteUid"] = remoteUid;
@@ -116,6 +119,7 @@ class AgoraManager {
           UserOfflineReasonType reason) {
         remoteUids.remove(remoteUid);
         messageCallback("Remote user uid:$remoteUid left the channel");
+        // Notify the UI
         Map<String, dynamic> eventArgs = {};
         eventArgs["connection"] = connection;
         eventArgs["remoteUid"] = remoteUid;
