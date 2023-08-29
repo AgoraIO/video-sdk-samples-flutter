@@ -1,6 +1,6 @@
 # Video SDK reference app (Flutter)
 
-This app demonstrates use of Agora Video SDK for real-time audio and video communication. It is a robust and comprehensive documentation reference app for Flutter, designed to enhance your productivity and understanding. It's built to be flexible, easily extensible, and beginner-friendly.
+This repository holds the complete code examples presented in the [Agora Video SDK for Flutter](https://docs.agora.io/en/video-calling/overview/product-overview?platform=flutter) documentation. The reference app demonstrates use of Agora Video SDK for real-time audio and video communication. It is a robust and comprehensive documentation reference app, designed to enhance your productivity and understanding. It's built to be flexible, easily extensible, and beginner-friendly.
 
 ## Prerequisites
 
@@ -36,7 +36,7 @@ Before getting started with this example app, please ensure you have the followi
 
 1. Modify `config.json`
 
-   The app loads connection parameters from the [`config.json`](./agora-manager/src/main/res/raw/config.json) file. Ensure that the file is populated with the required parameter values before running the application.
+   The app loads connection parameters from the [`config.json`](flutter=reference-app/assets/config/config.json) file. Ensure that the file is populated with the required parameter values before running the application.
 
     - `uid`: The user ID associated with the application.
     - `appId`: (Required) The unique ID for the application obtained from [Agora Console](https://console.agora.io). 
@@ -47,9 +47,23 @@ Before getting started with this example app, please ensure you have the followi
 
     If a valid `serverUrl` is provided, all examples use the token server to obtain a token except the **SDK quickstart** project that uses the `rtcToken`. If a `serverUrl` is not specified, all examples except **Secure authentication with tokens** use the `rtcToken` from `config.json`.
 
-1. Build and run the project
+1. Launch Android Studio or the IDE of your choice. From the **File** menu, select **Open...** then choose the `flutter_reference_app` folder. 
 
-    To build and run the project, select your connected Android device or emulator and press the **Run** button in Android Studio.
+1. Run the following command to install the project's dependencies:
+
+    ```bash
+    flutter pub get
+    ```
+
+1. Connect an Android device to your development machine.
+
+1. In the IDE, click **Run app** or run the following command: 
+
+    ```bash
+    flutter run
+    ```
+
+    A moment later, you see the project installed on your device.
 
 1. From the main app screen, choose and launch an example.
 
@@ -57,58 +71,19 @@ Before getting started with this example app, please ensure you have the followi
 
 This demo app includes several examples that illustrate the functionality and features of Agora Video/Voice SDK. Each example is self-contained and the relevant code can be found in its own folder in the root directory. For more information about each example, see the README file within the directory.
 
-- [SDK quickstart](agora-manager)
-- [Secure authentication with tokens](authentication-workflow)
-- [Call quality best practice](ensure-channel-quality)
-- [Connect through restricted networks with Cloud Proxy](cloud-proxy)
-- [Stream media to a channel](play-media)
-- [Secure channel encryption](media-stream-encryption)
-- [Screen share, volume control and mute](product-workflow)
-- [Custom video and audio sources](custom-video-and-audio)
-- [Raw video and audio processing](stream-raw-audio-and-video)
-- [Geofencing](geofencing)
-
-To view the UI implementation, open the relevant Activity Class file [here]( android-reference-app/app/src/main/java/io/agora/android_reference_app).
-
-
-https://github.com/AgoraIO/video-sdk-samples-android/assets/65331551/65de543d-2977-46f9-92b5-37a05413845b
+- [SDK quickstart](flutter-reference-app/lib/agora-manager)
+- [Secure authentication with tokens](flutter-reference-app/lib/authentication-workflow)
+- [Call quality best practice](flutter-reference-app/lib/ensure-channel-quality)
+- [Connect through restricted networks with Cloud Proxy](flutter-reference-app/lib/cloud-proxy)
+- [Stream media to a channel](flutter-reference-app/lib/play-media)
+- [Secure channel encryption](flutter-reference-app/lib/media-stream-encryption)
+- [Screen share, volume control and mute](flutter-reference-app/lib/product-workflow)
+- [Custom video and audio sources](flutter-reference-app/lib/custom-video-and-audio)
+- [Raw video and audio processing](flutter-reference-app/lib/stream-raw-audio-and-video)
+- [Geofencing](flutter-reference-app/lib/geofencing)
 
 
 ## Contact
 
-If you have any questions, issues, or suggestions, please file an issue in our [GitHub Issue Tracker](https://github.com/AgoraIO/video-sdk-samples-android/issues).
-
----
-
-# Agora Video SDK for Flutter sample projects
-
-This repository holds the code examples used for the [Agora Video SDK for Flutter](https://docs.agora.io/en/video-calling/overview/product-overview?platform=flutter) documentation. Clone the repo, run the samples, and use the code in your own projects. Enjoy.
-
-## Sample projects
-
-The runnable code examples are:
-
-- [SDK quickstart](./sdk_quickstart/) - The minimum code you need to integrate high-quality, low-latency Video 
-  Calling features into your app using Video SDK.
-- [Authentication workflow](./authentication_workflow/) - Retrieve a token from an authentication server, and use it to connect securely to a specific Video Calling channel.
-- [Call quality best practice](./src/call_quality/) - How to use Video SDK features to ensure optimal audio and video quality in your app. 
-
-
-## Run a sample project
-
-To run a sample project in this repository, take the following steps:
-
-1. Clone this Git repository by executing the following command in a terminal window:
-
-    ```bash
-    git clone https://github.com/AgoraIO/video-sdk-samples-flutter
-    ```
-
-1. Launch Android Studio or the IDE of your choice. From the **File** menu, select **Open...** then choose the folder for the sample project you want to run. Wait for Gradle sync to complete.
-
-1. Refer to the README file in the selected project folder and follow the link to view complete project documentation for your product of interest.
-
-1. Connect an Android device to your development machine.
-
-1. In the IDE, click **Run app**. A moment later, you see the project installed on your device.
+If you have any questions, issues, or suggestions, please file an issue in our [GitHub Issue Tracker](https://github.com/AgoraIO/video-sdk-samples-flutter/issues).
 
