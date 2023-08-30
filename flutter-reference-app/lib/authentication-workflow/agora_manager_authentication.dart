@@ -51,23 +51,27 @@ class AgoraManagerAuthentication extends AgoraManager {
   }
 
   Future<String> fetchToken(int uid, String channelName) async {
-    // Token role, use 1 for Host/Broadcaster, 2 for Subscriber/Audience
+    // Set the token role,
+    // use 1 for Host/Broadcaster, 2 for Subscriber/Audience
     int tokenRole = isBroadcaster ? 1 : 2;
-    // Prepare the Url
-    String url =
-        '${config['serverUrl']}/rtc/$channelName/${tokenRole.toString()}/uid/${uid.toString()}?expiry=${config['tokenExpiryTime'].toString()}';
 
-    // Send the request
+    // Prepare the Url
+    String url = '${config['serverUrl']}/rtc/$channelName/'
+        '${tokenRole.toString()}/uid/${uid.toString()}'
+        '?expiry=${config['tokenExpiryTime'].toString()}';
+
+    // Send the http GET request
     final response = await http.get(Uri.parse(url));
 
-    if (response.statusCode == 200) {
-      // If the server returns an OK response, then parse the JSON.
+    // Read the response
+    if (response.statusCode == 200) { // The server returned an OK response
+      // Parse the JSON.
       Map<String, dynamic> json = jsonDecode(response.body);
       String newToken = json['rtcToken'];
-      // Update the config
+      // Store the channelName and uid
       this.channelName = channelName;
       localUid = uid;
-      // Use the token to join a channel or renew an expiring token
+      // Return the token
       return newToken;
     } else {
       // Throw an exception.
@@ -77,13 +81,12 @@ class AgoraManagerAuthentication extends AgoraManager {
   }
 
   void renewToken() async {
-    // Retrieve a token from the server
     String token;
-    try {
+
+    try { // Retrieve a token from the server
       token = await fetchToken(localUid, channelName);
-      // Proceed with token usage or further operations
     } catch (e) {
-      // Handle the exception or display an error message
+      // Handle the exception
       messageCallback('Error fetching token');
       return;
     }

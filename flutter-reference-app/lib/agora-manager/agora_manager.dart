@@ -74,13 +74,14 @@ class AgoraManager {
     return AgoraVideoView(
       controller: VideoViewController(
         rtcEngine: agoraEngine!,
-        canvas: const VideoCanvas(uid: 0), // Always set uid = 0 for local view
+        canvas: const VideoCanvas(uid: 0), // Use uid = 0 for local view
       ),
     );
   }
 
   RtcEngineEventHandler getEventHandler() {
     return RtcEngineEventHandler(
+      // Occurs when the network connection state changes
       onConnectionStateChanged: (RtcConnection connection,
           ConnectionStateType state, ConnectionChangedReasonType reason) {
         if (reason ==
@@ -95,6 +96,7 @@ class AgoraManager {
         eventArgs["reason"] = reason;
         eventCallback("onConnectionStateChanged", eventArgs);
       },
+      // Occurs when a local user joins a channel
       onJoinChannelSuccess: (RtcConnection connection, int elapsed) {
         isJoined = true;
         messageCallback(
@@ -105,6 +107,7 @@ class AgoraManager {
         eventArgs["elapsed"] = elapsed;
         eventCallback("onJoinChannelSuccess", eventArgs);
       },
+      // Occurs when a remote user joins the channel
       onUserJoined: (RtcConnection connection, int remoteUid, int elapsed) {
         remoteUids.add(remoteUid);
         messageCallback("Remote user uid:$remoteUid joined the channel");
@@ -115,6 +118,7 @@ class AgoraManager {
         eventArgs["elapsed"] = elapsed;
         eventCallback("onUserJoined", eventArgs);
       },
+      // Occurs when a remote user leaves the channel
       onUserOffline: (RtcConnection connection, int remoteUid,
           UserOfflineReasonType reason) {
         remoteUids.remove(remoteUid);
@@ -155,15 +159,19 @@ class AgoraManager {
     token = (token.isEmpty) ? config['rtcToken'] : token;
     uid = (uid == -1) ? localUid : uid;
 
+    // Set up Agora engine
     if (agoraEngine == null) await setupAgoraEngine();
 
+    // Enable the local video preview
     await agoraEngine!.startPreview();
+
     // Set channel options including the client role and channel profile
     ChannelMediaOptions options = ChannelMediaOptions(
       clientRoleType: clientRole,
       channelProfile: ChannelProfileType.channelProfileCommunication,
     );
 
+    // Join a channel
     await agoraEngine!.joinChannel(
       token: token,
       channelId: channelName,
@@ -173,12 +181,16 @@ class AgoraManager {
   }
 
   Future<void> leave() async {
+    // Clear saved remote Uids
     remoteUids.clear();
+
+    // Leave the channel
     if (agoraEngine != null) {
       await agoraEngine!.leaveChannel();
     }
     isJoined = false;
-    // Destroy the engine instance
+
+    // Destroy the Agora engine instance
     destroyAgoraEngine();
   }
 
