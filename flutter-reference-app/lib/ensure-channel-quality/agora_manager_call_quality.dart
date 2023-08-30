@@ -12,12 +12,12 @@ class AgoraManagerCallQuality extends AgoraManagerAuthentication {
     required ProductName currentProduct,
     required Function(String message) messageCallback,
     required Function(String eventName, Map<String, dynamic> eventArgs)
-    eventCallback,
+        eventCallback,
   }) : super(
-    currentProduct: currentProduct,
-    messageCallback: messageCallback,
-    eventCallback: eventCallback,
-  ) {
+          currentProduct: currentProduct,
+          messageCallback: messageCallback,
+          eventCallback: eventCallback,
+        ) {
     // Additional initialization specific to AgoraManagerCallQuality
   }
 
@@ -25,7 +25,7 @@ class AgoraManagerCallQuality extends AgoraManagerAuthentication {
     required ProductName currentProduct,
     required Function(String message) messageCallback,
     required Function(String eventName, Map<String, dynamic> eventArgs)
-    eventCallback,
+        eventCallback,
   }) async {
     final manager = AgoraManagerCallQuality(
       currentProduct: currentProduct,
@@ -44,7 +44,10 @@ class AgoraManagerCallQuality extends AgoraManagerAuthentication {
 
     // Create an instance of the Agora engine
     agoraEngine = createAgoraRtcEngine();
-    await agoraEngine!.initialize(RtcEngineContext(appId: appId));
+    await agoraEngine!.initialize(RtcEngineContext(
+        appId: appId,
+        logConfig:
+            const LogConfig(fileSizeInKB: 2048, level: LogLevel.logLevelWarn)));
 
     if (currentProduct != ProductName.voiceCalling) {
       await agoraEngine!.enableVideo();
@@ -82,7 +85,7 @@ class AgoraManagerCallQuality extends AgoraManagerAuthentication {
     LastmileProbeConfig config = const LastmileProbeConfig(
       probeUplink: true,
       probeDownlink: true,
-      expectedUplinkBitrate: 100000,  // Range 100000-5000000 bps
+      expectedUplinkBitrate: 100000, // Range 100000-5000000 bps
       expectedDownlinkBitrate: 100000, // Range 100000-5000000 bps
     );
     agoraEngine!.startLastmileProbeTest(config);
@@ -96,7 +99,8 @@ class AgoraManagerCallQuality extends AgoraManagerAuthentication {
           ConnectionStateType state, ConnectionChangedReasonType reason) {
         messageCallback(
             "Connection state changed\n New state: ${state.name}\n Reason: ${reason.name}");
-        super.getEventHandler().onConnectionStateChanged!(connection, state, reason);
+        super.getEventHandler().onConnectionStateChanged!(
+            connection, state, reason);
       },
       onLastmileQuality: (QualityType quality) {
         networkQuality = quality.index;
@@ -134,22 +138,18 @@ class AgoraManagerCallQuality extends AgoraManagerAuthentication {
         }
         if (msg.isNotEmpty) messageCallback(msg);
       },
-      onRemoteVideoStateChanged: (RtcConnection connection,
-          int remoteUid,
-          RemoteVideoState state,
-          RemoteVideoStateReason reason,
-          int elapsed) {
+      onRemoteVideoStateChanged: (RtcConnection connection, int remoteUid,
+          RemoteVideoState state, RemoteVideoStateReason reason, int elapsed) {
         String msg = "Remote video state changed: \n Uid: $remoteUid"
             " \n NewState: $state\n reason: $reason\n elapsed: $elapsed";
         messageCallback(msg);
       },
       onRemoteVideoStats: (RtcConnection connection, RemoteVideoStats stats) {
-        remoteVideoStatsSummary =
-          "Uid: ${stats.uid}"
-          "\nRenderer frame rate: ${stats.rendererOutputFrameRate}"
-          "\nReceived bitrate: ${stats.receivedBitrate}"
-          "\nPublish duration: ${stats.publishDuration}"
-          "\nFrame loss rate: ${stats.frameLossRate}";
+        remoteVideoStatsSummary = "Uid: ${stats.uid}"
+            "\nRenderer frame rate: ${stats.rendererOutputFrameRate}"
+            "\nReceived bitrate: ${stats.receivedBitrate}"
+            "\nPublish duration: ${stats.publishDuration}"
+            "\nFrame loss rate: ${stats.frameLossRate}";
 
         Map<String, dynamic> eventArgs = {};
         eventArgs["connection"] = connection;
@@ -160,10 +160,12 @@ class AgoraManagerCallQuality extends AgoraManagerAuthentication {
         super.getEventHandler().onTokenPrivilegeWillExpire!(connection, token);
       },
       onJoinChannelSuccess: (RtcConnection connection, int elapsed) {
-        if (connection.localUid == 0xFFFFFFFF) { // Echo test started
+        if (connection.localUid == 0xFFFFFFFF) {
+          // Echo test started
           messageCallback("Audio echo test started");
           return;
-        } else { // Joined a channel
+        } else {
+          // Joined a channel
           isJoined = true;
         }
         messageCallback(
@@ -177,7 +179,8 @@ class AgoraManagerCallQuality extends AgoraManagerAuthentication {
       onUserJoined: (RtcConnection connection, int remoteUid, int elapsed) {
         super.getEventHandler().onUserJoined!(connection, remoteUid, elapsed);
       },
-      onUserOffline: (RtcConnection connection, int remoteUid, UserOfflineReasonType reason) {
+      onUserOffline: (RtcConnection connection, int remoteUid,
+          UserOfflineReasonType reason) {
         super.getEventHandler().onUserOffline!(connection, remoteUid, reason);
       },
     );
@@ -188,7 +191,7 @@ class AgoraManagerCallQuality extends AgoraManagerAuthentication {
 
     // Get a token for the test
     String token;
-    if (config['serverUrl'].toString().contains('http')){
+    if (config['serverUrl'].toString().contains('http')) {
       // Use the uid 0xFFFFFFFF to get a token for the echo test
       // Ensure that the channel name is unique for each user when running the echo test
       token = await fetchToken(0xFFFFFFFF, channelName);
@@ -207,7 +210,7 @@ class AgoraManagerCallQuality extends AgoraManagerAuthentication {
 
     // Start the echo test
     agoraEngine!.startEchoTest(echoConfig);
-}
+  }
 
   void stopEchoTest() {
     agoraEngine!.stopEchoTest();
@@ -217,12 +220,11 @@ class AgoraManagerCallQuality extends AgoraManagerAuthentication {
 
   void setVideoQuality(int remoteUid, bool isHighQuality) {
     if (isHighQuality) {
-      agoraEngine!.setRemoteVideoStreamType(uid: remoteUid,
-          streamType: VideoStreamType.videoStreamHigh);
+      agoraEngine!.setRemoteVideoStreamType(
+          uid: remoteUid, streamType: VideoStreamType.videoStreamHigh);
     } else {
-      agoraEngine!.setRemoteVideoStreamType(uid: remoteUid,
-          streamType: VideoStreamType.videoStreamLow);
+      agoraEngine!.setRemoteVideoStreamType(
+          uid: remoteUid, streamType: VideoStreamType.videoStreamLow);
     }
   }
-
 }
