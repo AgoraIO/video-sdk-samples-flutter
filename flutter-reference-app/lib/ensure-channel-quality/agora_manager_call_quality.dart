@@ -133,7 +133,7 @@ class AgoraManagerCallQuality extends AgoraManagerAuthentication {
         if (counter == 5) {
           msg = "${stats.userCount} user(s)";
         } else if (counter == 10) {
-          msg = "Last mile delay: ${stats..lastmileDelay}";
+          msg = "Last mile delay: ${stats.lastmileDelay}";
           counter = 0;
         }
         if (msg.isNotEmpty) messageCallback(msg);
