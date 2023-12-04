@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_reference_app/agora-manager/agora_manager.dart';
 import 'package:flutter_reference_app/agora-manager/ui_helper.dart';
+import 'package:flutter_reference_app/cloud_proxy/cloud_proxy_ui.dart';
 import 'package:flutter_reference_app/sdk-quickstart/sdk_quickstart_ui.dart';
 import 'package:flutter_reference_app/authentication-workflow/authentication_workflow_ui.dart';
 import 'package:flutter_reference_app/ensure-channel-quality/call_quality_ui.dart';
@@ -29,7 +30,21 @@ class MyAppState extends State<MyApp> with UiHelper {
   final List<Example> examples = [
     Example(name: 'SDK quickstart', category: 'GET STARTED', id: 'sdk_quickstart'),
     Example(name: 'Secure authentication with tokens', category: 'GET STARTED', id: 'authentication_workflow'),
+
     Example(name: 'Call quality best practice', category: 'DEVELOP', id: 'call_quality'),
+    Example(name: 'Stream media to a channel', category: 'DEVELOP', id: 'stream_media'),
+    Example(name: 'Screen share, volume control, and mute', category: 'DEVELOP', id: 'product_workflow'),
+    Example(name: 'Cloud proxy', category: 'DEVELOP', id: 'cloud_proxy'),
+    Example(name: 'Media stream encryption', category: 'DEVELOP', id: 'secure_channel_encryption'),
+    Example(name: 'Custom video and audio', category: 'DEVELOP', id: 'Custom_video_audio'),
+    Example(name: 'Stream raw video and audio', category: 'DEVELOP', id: 'raw_video_audio'),
+    Example(name: 'Live streaming over multiple channels', category: 'DEVELOP', id: 'multiple_channels'),
+
+    Example(name: 'Audio and voice effects', category: 'INTEGRATE FEATURES', id: 'audio_voice_effects'),
+    Example(name: '3D Spatial audio', category: 'INTEGRATE FEATURES', id: 'spatial_audio'),
+    Example(name: 'Geofencing', category: 'INTEGRATE FEATURES', id: 'geofencing'),
+    Example(name: 'Virtual background', category: 'INTEGRATE FEATURES', id: 'virtual_background'),
+    Example(name: 'AI noise suppression', category: 'INTEGRATE FEATURES', id: 'ai_noise_suppression'),
   ];
 
   Map<ProductName, String> productFriendlyNames = {
@@ -87,8 +102,6 @@ class MyAppState extends State<MyApp> with UiHelper {
   }
 
   void onItemClicked(String exampleId) {
-    print('ExampleId clicked: $exampleId');
-
     switch (exampleId) {
       case 'sdk_quickstart':
         Navigator.push(
@@ -108,8 +121,14 @@ class MyAppState extends State<MyApp> with UiHelper {
           MaterialPageRoute(builder: (context) => CallQualityScreen(selectedProduct: selectedProduct)),
         );
         break;
+      case 'cloud_proxy':
+        Navigator.push(
+          context,
+          MaterialPageRoute(builder: (context) => CloudProxyScreen(selectedProduct: selectedProduct)),
+        );
+        break;
       default:
-        print("Invalid");
+        // print("Invalid");
     }
   }
 
