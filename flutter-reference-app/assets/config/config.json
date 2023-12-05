@@ -5,5 +5,7 @@
     "rtcToken": "007eJxTYOj42lQxS/9zWmsmi8+KlXdq+H6233guEJBkIci/LvR4b6UCg2WKkYmlhYWFQaqlsYmZsVGSsUWSQaKZRVqiUZqhmZHR3ltvUhoCGRlYOH6yMDJAIJjPkJKam8/AAABPYB9F",
     "proxyUrl": "<---- Your Proxy Server URL ---->",
     "serverUrl": "https://agora-token-service-production-b619.up.railway.app",
-    "tokenExpiryTime": "100"
+    "tokenExpiryTime": "100",
+    "cipherKey": "e0e9a7aab1fc936f18cfac50c78109ce5ea400af005e5666ad639da6a196e85a",
+    "salt": "FlGQKElY4nhZEtSxTUlNiXINzkwQeySNiMxl90x2EVg="
 }
