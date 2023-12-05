@@ -30,7 +30,7 @@ class MyAppState extends State<MyApp> with UiHelper {
   final List<Example> examples = [
     Example(name: 'SDK quickstart', category: 'GET STARTED', id: 'sdk_quickstart'),
     Example(name: 'Secure authentication with tokens', category: 'GET STARTED', id: 'authentication_workflow'),
-
+    // Develop
     Example(name: 'Call quality best practice', category: 'DEVELOP', id: 'call_quality'),
     Example(name: 'Stream media to a channel', category: 'DEVELOP', id: 'stream_media'),
     Example(name: 'Screen share, volume control, and mute', category: 'DEVELOP', id: 'product_workflow'),
@@ -39,7 +39,7 @@ class MyAppState extends State<MyApp> with UiHelper {
     Example(name: 'Custom video and audio', category: 'DEVELOP', id: 'Custom_video_audio'),
     Example(name: 'Stream raw video and audio', category: 'DEVELOP', id: 'raw_video_audio'),
     Example(name: 'Live streaming over multiple channels', category: 'DEVELOP', id: 'multiple_channels'),
-
+    // Integrate features
     Example(name: 'Audio and voice effects', category: 'INTEGRATE FEATURES', id: 'audio_voice_effects'),
     Example(name: '3D Spatial audio', category: 'INTEGRATE FEATURES', id: 'spatial_audio'),
     Example(name: 'Geofencing', category: 'INTEGRATE FEATURES', id: 'geofencing'),

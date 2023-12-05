@@ -60,6 +60,7 @@ class AgoraManagerCloudProxy extends AgoraManagerAuthentication {
           directConnectionFailed = true;
           messageCallback("Join failed, reason: $reason");
         }
+        super.getEventHandler().onConnectionStateChanged!(connection, state, reason);
       },
       onProxyConnected: (String channel, int uid, ProxyType proxyType,
           String localProxyIp, int elapsed) {
