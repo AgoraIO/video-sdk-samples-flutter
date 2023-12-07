@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_reference_app/agora-manager/agora_manager.dart';
 import 'package:flutter_reference_app/agora-manager/ui_helper.dart';
 import 'package:flutter_reference_app/cloud_proxy/cloud_proxy_ui.dart';
+import 'package:flutter_reference_app/geofencing/geofencing_ui.dart';
 import 'package:flutter_reference_app/media-stream-encryption/media_stream_encryption_ui.dart';
 import 'package:flutter_reference_app/sdk-quickstart/sdk_quickstart_ui.dart';
 import 'package:flutter_reference_app/authentication-workflow/authentication_workflow_ui.dart';
@@ -132,6 +133,12 @@ class MyAppState extends State<MyApp> with UiHelper {
         Navigator.push(
           context,
           MaterialPageRoute(builder: (context) => MediaStreamEncryptionScreen(selectedProduct: selectedProduct)),
+        );
+        break;
+      case 'geofencing':
+        Navigator.push(
+          context,
+          MaterialPageRoute(builder: (context) => GeofencingScreen(selectedProduct: selectedProduct)),
         );
         break;
       default:

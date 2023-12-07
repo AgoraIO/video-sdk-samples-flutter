@@ -1,16 +1,14 @@
+import 'dart:ffi';
+
 import 'package:agora_rtc_engine/agora_rtc_engine.dart';
 import 'package:flutter_reference_app/authentication-workflow/agora_manager_authentication.dart';
 import 'package:flutter_reference_app/agora-manager/agora_manager.dart';
-import 'dart:convert';
-import 'dart:typed_data';
+import 'package:permission_handler/permission_handler.dart';
 
-class AgoraManagerMediaStreamEncryption extends AgoraManagerAuthentication {
-  // A 32-byte string for encryption.
-  String encryptionKey = "";
-  // A 32-byte string in Base64 format for encryption.
-  String encryptionSaltBase64 = "";
+class AgoraManagerGeofencing extends AgoraManagerAuthentication {
+  bool directConnectionFailed = false;
 
-  AgoraManagerMediaStreamEncryption({
+  AgoraManagerGeofencing({
     required ProductName currentProduct,
     required Function(String message) messageCallback,
     required Function(String eventName, Map<String, dynamic> eventArgs)
@@ -20,16 +18,16 @@ class AgoraManagerMediaStreamEncryption extends AgoraManagerAuthentication {
           messageCallback: messageCallback,
           eventCallback: eventCallback,
         ) {
-    // Additional initialization specific to AgoraManagerMediaStreamEncryption
+    // Additional initialization specific to AgoraManagerGeofencing
   }
 
-  static Future<AgoraManagerMediaStreamEncryption> create({
+  static Future<AgoraManagerGeofencing> create({
     required ProductName currentProduct,
     required Function(String message) messageCallback,
     required Function(String eventName, Map<String, dynamic> eventArgs)
         eventCallback,
   }) async {
-    final manager = AgoraManagerMediaStreamEncryption(
+    final manager = AgoraManagerGeofencing(
       currentProduct: currentProduct,
       messageCallback: messageCallback,
       eventCallback: eventCallback,
@@ -39,34 +37,32 @@ class AgoraManagerMediaStreamEncryption extends AgoraManagerAuthentication {
     return manager;
   }
 
-  void enableEncryption() {
-    encryptionKey = config['cipherKey'];
-    encryptionSaltBase64 = config['salt'];
+  @override
+  Future<void> setupAgoraEngine() async {
+    // Retrieve or request camera and microphone permissions
+    await [Permission.microphone, Permission.camera].request();
 
-    if (encryptionSaltBase64.isEmpty || encryptionKey.isEmpty) {
-      messageCallback("Please set encryption key and salt");
-      return;
+    // Create an instance of the Agora engine
+    agoraEngine = createAgoraRtcEngine();
+
+    // Your app will only connect to Agora SD-RTN located in North America.
+    // Define a set of flags using bitwise OR
+    int myFlags = AreaCode.areaCodeGlob.value() | AreaCode.areaCodeCn.value() ;
+
+    // Exclude a specific value using bitwise NOT and bitwise AND
+    int excludedValue = myFlags & ~AreaCode.areaCodeIn.value();
+
+    await agoraEngine!.initialize(RtcEngineContext(
+        areaCode: AreaCode.areaCodeNa.value(),
+        appId: appId
+    ));
+
+    if (currentProduct != ProductName.voiceCalling) {
+      await agoraEngine!.enableVideo();
     }
 
-    // Convert the salt string into the required format
-    Uint8List bytes = base64Decode(encryptionSaltBase64);
-
-    // An object to specify encryption configuration.
-    EncryptionConfig encryptionConfig = EncryptionConfig(
-        encryptionMode: EncryptionMode.aes128Gcm2,
-        encryptionKey: encryptionKey,
-        encryptionKdfSalt: Uint8List.fromList(utf8.encode(encryptionSaltBase64)));
-
-    // Enable media encryption using the configuration
-    agoraEngine?.enableEncryption(enabled: true, config: encryptionConfig);
-
-    messageCallback("Media encryption enabled");
-  }
-
-  @override
-  Future<void> joinChannelWithToken([String? channelName]) async {
-    enableEncryption();
-    return super.joinChannelWithToken(channelName);
+    // Register the event handler
+    agoraEngine!.registerEventHandler(getEventHandler());
   }
 
   @override
@@ -75,8 +71,17 @@ class AgoraManagerMediaStreamEncryption extends AgoraManagerAuthentication {
       // Occurs when the network connection state changes
       onConnectionStateChanged: (RtcConnection connection,
           ConnectionStateType state, ConnectionChangedReasonType reason) {
+        if (state == ConnectionStateType.connectionStateFailed &&
+            reason == ConnectionChangedReasonType.connectionChangedJoinFailed) {
+          directConnectionFailed = true;
+          messageCallback("Join failed, reason: $reason");
+        }
         super.getEventHandler().onConnectionStateChanged!(
             connection, state, reason);
+      },
+      onProxyConnected: (String channel, int uid, ProxyType proxyType,
+          String localProxyIp, int elapsed) {
+        messageCallback("Connected to ${proxyType.toString()}");
       },
       onTokenPrivilegeWillExpire: (RtcConnection connection, String token) {
         super.getEventHandler().onTokenPrivilegeWillExpire!(connection, token);
