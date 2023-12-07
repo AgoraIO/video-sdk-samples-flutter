@@ -45,17 +45,15 @@ class AgoraManagerGeofencing extends AgoraManagerAuthentication {
     // Create an instance of the Agora engine
     agoraEngine = createAgoraRtcEngine();
 
-    // Your app will only connect to Agora SD-RTN located in North America.
-    // Define a set of flags using bitwise OR
-    int myFlags = AreaCode.areaCodeGlob.value() | AreaCode.areaCodeCn.value() ;
-
-    // Exclude a specific value using bitwise NOT and bitwise AND
-    int excludedValue = myFlags & ~AreaCode.areaCodeIn.value();
+    // Define a set of areas using bitwise OR
+    int myAreas = AreaCode.areaCodeEu.value() | AreaCode.areaCodeNa.value() ;
 
     await agoraEngine!.initialize(RtcEngineContext(
-        areaCode: AreaCode.areaCodeNa.value(),
+        areaCode: myAreas,
         appId: appId
     ));
+
+    messageCallback("Geofencing enabled");
 
     if (currentProduct != ProductName.voiceCalling) {
       await agoraEngine!.enableVideo();
