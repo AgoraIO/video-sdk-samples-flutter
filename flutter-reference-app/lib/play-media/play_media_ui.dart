@@ -114,14 +114,20 @@ class PlayMediaScreenState extends State<PlayMediaScreen> with UiHelper {
   }
 
   Widget _mediaPreview() {
-    if (agoraManager.isJoined) {
-      if (agoraManager.isPlaying) {
-        return mediaPlayerView;
-      } else {
-        return Container();
-      }
+    if (agoraManager.isJoined && agoraManager.isPlaying) {
+      return Container(
+          height: 150,
+          decoration: BoxDecoration(border: Border.all()),
+          margin: const EdgeInsets.only(bottom: 5),
+          child: Center(
+              child: mediaPlayerView
+              )
+        );
     } else {
-      return Container();
+      return  const Text(
+        'Nothing to see here',
+        textAlign: TextAlign.center,
+      );
     }
   }
 
