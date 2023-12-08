@@ -52,13 +52,8 @@ class AgoraManagerPlayMedia extends AgoraManagerAuthentication {
     // Create an instance of the Agora engine
     agoraEngine = createAgoraRtcEngine();
 
-    // Define a set of areas using bitwise OR
-    int myAreas = AreaCode.areaCodeEu.value() | AreaCode.areaCodeNa.value();
-
     await agoraEngine!
-        .initialize(RtcEngineContext(areaCode: myAreas, appId: appId));
-
-    messageCallback("PlayMedia enabled");
+        .initialize(RtcEngineContext(appId: appId));
 
     if (currentProduct != ProductName.voiceCalling) {
       await agoraEngine!.enableVideo();
@@ -72,9 +67,24 @@ class AgoraManagerPlayMedia extends AgoraManagerAuthentication {
     _mediaPlayerController.open(url:mediaLocation, startPos:0);
   }
 
+  @override
+  Future<void> leave() async {
+    // Dispose the media player
+    _mediaPlayerController.dispose();
+
+    isUrlOpened = false;
+    isPlaying = false;
+    isPaused = false;
+    duration = 0;
+    seekPos = 0;
+    super.leave();
+  }
+
   AgoraVideoView playMediaFile() {
-    _mediaPlayerController.resume();
+    // Play the loaded media file
+    _mediaPlayerController.play();
     isPlaying = true;
+
     updateChannelPublishOptions(true);
     // Return AgoraVideoView for local viewing
     return AgoraVideoView(
@@ -83,7 +93,7 @@ class AgoraManagerPlayMedia extends AgoraManagerAuthentication {
   }
 
   void pausePlaying() {
-    _mediaPlayerController.resume();
+    _mediaPlayerController.pause();
     isPaused = true;
   }
 
@@ -117,22 +127,23 @@ class AgoraManagerPlayMedia extends AgoraManagerAuthentication {
             // Media file opened successfully
             duration = await _mediaPlayerController.getDuration();
               isUrlOpened = true;
-            // Notify the UI
-            Map<String, dynamic> eventArgs = {};
-            // eventArgs["connection"] = connection;
-            eventCallback("playerStateOpenCompleted", eventArgs);
           } else if (state == MediaPlayerState.playerStatePlaybackAllLoopsCompleted) {
             // Media file finished playing
               isPlaying = false;
               seekPos = 0;
               // Restore camera and microphone streams
               updateChannelPublishOptions(isPlaying);
-              Map<String, dynamic> eventArgs = {};
-              eventCallback("playerStatePlaybackAllLoopsCompleted", eventArgs);
           }
+          // Notify the UI
+          Map<String, dynamic> eventArgs = {};
+          // eventArgs["connection"] = connection;
+          eventCallback("onPlayerSourceStateChanged", eventArgs);
         },
         onPositionChanged: (int position) {
             seekPos = position;
+            // Notify the UI
+            Map<String, dynamic> eventArgs = {};
+            eventCallback("onPositionChanged", eventArgs);
         },
         onPlayerEvent:
             (MediaPlayerEvent eventCode, int elapsedTime, String message) {

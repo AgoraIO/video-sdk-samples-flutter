@@ -89,6 +89,10 @@ class PlayMediaScreenState extends State<PlayMediaScreen> with UiHelper {
     );
   }
 
+  Future<void> join() async {
+    await agoraManager.joinChannelWithToken();
+  }
+
   void playMedia() async {
     if (!agoraManager.isUrlOpened) {
       await agoraManager.initializeMediaPlayer();
@@ -102,15 +106,16 @@ class PlayMediaScreenState extends State<PlayMediaScreen> with UiHelper {
       agoraManager.pausePlaying();
     } else {
       // Play the loaded media file
-      AgoraVideoView mediaPlayerView = agoraManager.playMediaFile();
-
-      // Show media player output locally
+      // The functions returns an AgoraVideoView for displaying the video locally
+      setState(() {
+        mediaPlayerView = agoraManager.playMediaFile();
+      });
     }
   }
 
   Widget _mediaPreview() {
     if (agoraManager.isJoined) {
-      if (agoraManager.isPlaying && mediaPlayerView !=  null) {
+      if (agoraManager.isPlaying) {
         return mediaPlayerView;
       } else {
         return Container();
@@ -140,10 +145,6 @@ class PlayMediaScreenState extends State<PlayMediaScreen> with UiHelper {
     });
   }
 
-  Future<void> join() async {
-    await agoraManager.joinChannelWithToken();
-  }
-
   // Release the resources when you leave
   @override
   Future<void> dispose() async {
@@ -155,13 +156,13 @@ class PlayMediaScreenState extends State<PlayMediaScreen> with UiHelper {
     // Handle the event based on the event name and named arguments
     switch (eventName) {
 
-      case 'playerStateOpenCompleted':
+      case 'onPlayerSourceStateChanged':
+        setState(() {});
+        break;
+      case 'onPositionChanged':
         setState(() {});
         break;
 
-      case 'playerStatePlaybackAllLoopsCompleted':
-        setState(() {});
-        break;
       case 'onConnectionStateChanged':
         // Connection state changed
         if (eventArgs["reason"] ==
