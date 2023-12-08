@@ -4,6 +4,7 @@ import 'package:flutter_reference_app/agora-manager/ui_helper.dart';
 import 'package:flutter_reference_app/cloud_proxy/cloud_proxy_ui.dart';
 import 'package:flutter_reference_app/geofencing/geofencing_ui.dart';
 import 'package:flutter_reference_app/media-stream-encryption/media_stream_encryption_ui.dart';
+import 'package:flutter_reference_app/play-media/play_media_ui.dart';
 import 'package:flutter_reference_app/sdk-quickstart/sdk_quickstart_ui.dart';
 import 'package:flutter_reference_app/authentication-workflow/authentication_workflow_ui.dart';
 import 'package:flutter_reference_app/ensure-channel-quality/call_quality_ui.dart';
@@ -35,18 +36,18 @@ class MyAppState extends State<MyApp> with UiHelper {
     // Develop
     Example(name: 'Call quality best practice', category: 'DEVELOP', id: 'call_quality'),
     Example(name: 'Stream media to a channel', category: 'DEVELOP', id: 'stream_media'),
-    Example(name: 'Screen share, volume control, and mute', category: 'DEVELOP', id: 'product_workflow'),
+    //Example(name: 'Screen share, volume control, and mute', category: 'DEVELOP', id: 'product_workflow'),
     Example(name: 'Cloud proxy', category: 'DEVELOP', id: 'cloud_proxy'),
     Example(name: 'Media stream encryption', category: 'DEVELOP', id: 'secure_channel_encryption'),
-    Example(name: 'Custom video and audio', category: 'DEVELOP', id: 'Custom_video_audio'),
-    Example(name: 'Stream raw video and audio', category: 'DEVELOP', id: 'raw_video_audio'),
-    Example(name: 'Live streaming over multiple channels', category: 'DEVELOP', id: 'multiple_channels'),
+    //Example(name: 'Custom video and audio', category: 'DEVELOP', id: 'Custom_video_audio'),
+    //Example(name: 'Stream raw video and audio', category: 'DEVELOP', id: 'raw_video_audio'),
+    //Example(name: 'Live streaming over multiple channels', category: 'DEVELOP', id: 'multiple_channels'),
     // Integrate features
-    Example(name: 'Audio and voice effects', category: 'INTEGRATE FEATURES', id: 'audio_voice_effects'),
-    Example(name: '3D Spatial audio', category: 'INTEGRATE FEATURES', id: 'spatial_audio'),
+    //Example(name: 'Audio and voice effects', category: 'INTEGRATE FEATURES', id: 'audio_voice_effects'),
+    //Example(name: '3D Spatial audio', category: 'INTEGRATE FEATURES', id: 'spatial_audio'),
     Example(name: 'Geofencing', category: 'INTEGRATE FEATURES', id: 'geofencing'),
-    Example(name: 'Virtual background', category: 'INTEGRATE FEATURES', id: 'virtual_background'),
-    Example(name: 'AI noise suppression', category: 'INTEGRATE FEATURES', id: 'ai_noise_suppression'),
+    //Example(name: 'Virtual background', category: 'INTEGRATE FEATURES', id: 'virtual_background'),
+    //Example(name: 'AI noise suppression', category: 'INTEGRATE FEATURES', id: 'ai_noise_suppression'),
   ];
 
   Map<ProductName, String> productFriendlyNames = {
@@ -139,6 +140,12 @@ class MyAppState extends State<MyApp> with UiHelper {
         Navigator.push(
           context,
           MaterialPageRoute(builder: (context) => GeofencingScreen(selectedProduct: selectedProduct)),
+        );
+        break;
+      case 'stream_media':
+        Navigator.push(
+          context,
+          MaterialPageRoute(builder: (context) => PlayMediaScreen(selectedProduct: selectedProduct)),
         );
         break;
       default:
