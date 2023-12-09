@@ -5,13 +5,10 @@ import 'package:permission_handler/permission_handler.dart';
 
 class AgoraManagerPlayMedia extends AgoraManagerAuthentication {
   late final MediaPlayerController _mediaPlayerController;
-  String mediaLocation =
-      "https://www.appsloveworld.com/wp-content/uploads/2018/10/640.mp4";
-
+  String mediaLocation = ""; // Set the location in the config file
   bool isUrlOpened = false; // Media file has been opened
   bool isPlaying = false; // Media file is playing
   bool isPaused = false; // Media player is paused
-
   int duration = 0; // Total duration of the loaded media file
   int seekPos = 0; // Current play position
 
@@ -64,8 +61,9 @@ class AgoraManagerPlayMedia extends AgoraManagerAuthentication {
   }
 
     void openMediaFile() {
-    _mediaPlayerController.open(url:mediaLocation, startPos:0);
-  }
+      mediaLocation = config['sampleMediaUrl'];
+      _mediaPlayerController.open(url:mediaLocation, startPos:0);
+    }
 
   @override
   Future<void> leave() async {
@@ -78,18 +76,16 @@ class AgoraManagerPlayMedia extends AgoraManagerAuthentication {
     duration = 0;
     seekPos = 0;
     super.leave();
+
+
+    agoraEngine = null;
   }
 
-  AgoraVideoView playMediaFile() {
+  void playMediaFile() {
     // Play the loaded media file
     _mediaPlayerController.play();
     isPlaying = true;
-
     updateChannelPublishOptions(true);
-    // Return AgoraVideoView for local viewing
-    return AgoraVideoView(
-      controller: _mediaPlayerController,
-    );
   }
 
   void pausePlaying() {

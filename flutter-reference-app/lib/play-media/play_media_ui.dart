@@ -19,7 +19,6 @@ class PlayMediaScreenState extends State<PlayMediaScreen> with UiHelper {
   bool isAgoraManagerInitialized = false;
   final GlobalKey<ScaffoldMessengerState> scaffoldMessengerKey =
       GlobalKey<ScaffoldMessengerState>(); // Global key to access the scaffold
-  Widget mediaPlayerView = Container();
 
   // Build UI
   @override
@@ -64,7 +63,7 @@ class PlayMediaScreenState extends State<PlayMediaScreen> with UiHelper {
                     agoraManager.seek(agoraManager.seekPos);
                     setState(() {});
                   }),
-              _mediaPreview()
+              _mediaPreview(),
             ],
           )),
     );
@@ -108,7 +107,7 @@ class PlayMediaScreenState extends State<PlayMediaScreen> with UiHelper {
       // Play the loaded media file
       // The functions returns an AgoraVideoView for displaying the video locally
       setState(() {
-        mediaPlayerView = agoraManager.playMediaFile();
+        agoraManager.playMediaFile();
       });
     }
   }
@@ -120,14 +119,11 @@ class PlayMediaScreenState extends State<PlayMediaScreen> with UiHelper {
           decoration: BoxDecoration(border: Border.all()),
           margin: const EdgeInsets.only(bottom: 5),
           child: Center(
-              child: mediaPlayerView
+              child: agoraManager.getPlayerView()
               )
         );
     } else {
-      return  const Text(
-        'Nothing to see here',
-        textAlign: TextAlign.center,
-      );
+      return Container();
     }
   }
 
