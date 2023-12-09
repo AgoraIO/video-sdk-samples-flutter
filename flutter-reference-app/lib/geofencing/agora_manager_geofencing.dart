@@ -1,13 +1,9 @@
-import 'dart:ffi';
-
 import 'package:agora_rtc_engine/agora_rtc_engine.dart';
 import 'package:flutter_reference_app/authentication-workflow/agora_manager_authentication.dart';
 import 'package:flutter_reference_app/agora-manager/agora_manager.dart';
 import 'package:permission_handler/permission_handler.dart';
 
 class AgoraManagerGeofencing extends AgoraManagerAuthentication {
-  bool directConnectionFailed = false;
-
   AgoraManagerGeofencing({
     required ProductName currentProduct,
     required Function(String message) messageCallback,
@@ -46,12 +42,10 @@ class AgoraManagerGeofencing extends AgoraManagerAuthentication {
     agoraEngine = createAgoraRtcEngine();
 
     // Define a set of areas using bitwise OR
-    int myAreas = AreaCode.areaCodeEu.value() | AreaCode.areaCodeNa.value() ;
+    int myAreas = AreaCode.areaCodeEu.value() | AreaCode.areaCodeNa.value();
 
-    await agoraEngine!.initialize(RtcEngineContext(
-        areaCode: myAreas,
-        appId: appId
-    ));
+    await agoraEngine!
+        .initialize(RtcEngineContext(areaCode: myAreas, appId: appId));
 
     messageCallback("Geofencing enabled");
 
@@ -61,39 +55,5 @@ class AgoraManagerGeofencing extends AgoraManagerAuthentication {
 
     // Register the event handler
     agoraEngine!.registerEventHandler(getEventHandler());
-  }
-
-  @override
-  RtcEngineEventHandler getEventHandler() {
-    return RtcEngineEventHandler(
-      // Occurs when the network connection state changes
-      onConnectionStateChanged: (RtcConnection connection,
-          ConnectionStateType state, ConnectionChangedReasonType reason) {
-        if (state == ConnectionStateType.connectionStateFailed &&
-            reason == ConnectionChangedReasonType.connectionChangedJoinFailed) {
-          directConnectionFailed = true;
-          messageCallback("Join failed, reason: $reason");
-        }
-        super.getEventHandler().onConnectionStateChanged!(
-            connection, state, reason);
-      },
-      onProxyConnected: (String channel, int uid, ProxyType proxyType,
-          String localProxyIp, int elapsed) {
-        messageCallback("Connected to ${proxyType.toString()}");
-      },
-      onTokenPrivilegeWillExpire: (RtcConnection connection, String token) {
-        super.getEventHandler().onTokenPrivilegeWillExpire!(connection, token);
-      },
-      onJoinChannelSuccess: (RtcConnection connection, int elapsed) {
-        super.getEventHandler().onJoinChannelSuccess!(connection, elapsed);
-      },
-      onUserJoined: (RtcConnection connection, int remoteUid, int elapsed) {
-        super.getEventHandler().onUserJoined!(connection, remoteUid, elapsed);
-      },
-      onUserOffline: (RtcConnection connection, int remoteUid,
-          UserOfflineReasonType reason) {
-        super.getEventHandler().onUserOffline!(connection, remoteUid, reason);
-      },
-    );
   }
 }
