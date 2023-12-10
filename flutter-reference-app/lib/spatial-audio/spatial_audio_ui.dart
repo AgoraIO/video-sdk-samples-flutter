@@ -3,20 +3,21 @@ import 'package:flutter/material.dart';
 import 'package:flutter_reference_app/agora-manager/agora_manager.dart';
 import 'package:flutter_reference_app/agora-manager/ui_helper.dart';
 import 'package:agora_rtc_engine/agora_rtc_engine.dart';
-import 'agora_manager_geofencing.dart';
+import 'agora_manager_spatial_audio.dart';
 
-class GeofencingScreen extends StatefulWidget {
+class SpatialAudioScreen extends StatefulWidget {
   final ProductName selectedProduct;
-  const GeofencingScreen({Key? key, required this.selectedProduct})
+  const SpatialAudioScreen({Key? key, required this.selectedProduct})
       : super(key: key);
 
   @override
-  GeofencingScreenState createState() => GeofencingScreenState();
+  SpatialAudioScreenState createState() => SpatialAudioScreenState();
 }
 
-class GeofencingScreenState extends State<GeofencingScreen> with UiHelper {
-  late AgoraManagerGeofencing agoraManager;
+class SpatialAudioScreenState extends State<SpatialAudioScreen> with UiHelper {
+  late AgoraManagerSpatialAudio agoraManager;
   bool isAgoraManagerInitialized = false;
+  double front = 0.0, right = 0.0, top = 0.0;
   final GlobalKey<ScaffoldMessengerState> scaffoldMessengerKey =
       GlobalKey<ScaffoldMessengerState>(); // Global key to access the scaffold
 
@@ -34,7 +35,7 @@ class GeofencingScreenState extends State<GeofencingScreen> with UiHelper {
       scaffoldMessengerKey: scaffoldMessengerKey,
       home: Scaffold(
           appBar: AppBar(
-            title: const Text('Geofencing'),
+            title: const Text('3D Spatial audio'),
           ),
           body: ListView(
             padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 4),
@@ -51,6 +52,47 @@ class GeofencingScreenState extends State<GeofencingScreen> with UiHelper {
                   child: Text(agoraManager.isJoined ? "Leave" : "Join"),
                 ),
               ),
+              const SizedBox(height: 20),
+              const Text('Move the sliders to update the remote user''s spatial position'),
+              Slider(
+                min: -20,
+                max: 20,
+                divisions: 20,
+                value: front,
+                label: 'Front: $front',
+                onChanged: (value) {
+                  setState(() {
+                    front = value;
+                  });
+                  updatePosition();
+                },
+              ),
+              Slider(
+                min: -20,
+                max: 20,
+                divisions: 20,
+                value: right,
+                label: 'Right: $right',
+                onChanged: (value) {
+                  setState(() {
+                    right = value;
+                  });
+                  updatePosition();
+                },
+              ),
+              Slider(
+                min: -20,
+                max: 20,
+                divisions: 20,
+                value: top,
+                label: 'Top: $top',
+                onChanged: (value) {
+                  setState(() {
+                    top = value;
+                  });
+                  updatePosition();
+                },
+              ),
             ],
           )),
     );
@@ -64,7 +106,7 @@ class GeofencingScreenState extends State<GeofencingScreen> with UiHelper {
 
   Future<void> initialize() async {
     // Set up an instance of AgoraManager
-    agoraManager = await AgoraManagerGeofencing.create(
+    agoraManager = await AgoraManagerSpatialAudio.create(
       currentProduct: widget.selectedProduct,
       messageCallback: showMessage,
       eventCallback: eventCallback,
@@ -121,4 +163,10 @@ class GeofencingScreenState extends State<GeofencingScreen> with UiHelper {
   void setStateCallback() {
     setState(() {});
   }
+
+  void updatePosition() {
+    if (agoraManager.remoteUids.isEmpty) return;
+    agoraManager.updateRemotePosition(agoraManager.remoteUids.first, front, right , top);
+  }
+
 }

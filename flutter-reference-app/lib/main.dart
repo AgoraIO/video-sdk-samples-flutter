@@ -8,6 +8,7 @@ import 'package:flutter_reference_app/play-media/play_media_ui.dart';
 import 'package:flutter_reference_app/sdk-quickstart/sdk_quickstart_ui.dart';
 import 'package:flutter_reference_app/authentication-workflow/authentication_workflow_ui.dart';
 import 'package:flutter_reference_app/ensure-channel-quality/call_quality_ui.dart';
+import 'package:flutter_reference_app/spatial-audio/spatial_audio_ui.dart';
 
 void main() => runApp(const MaterialApp(home: MyApp()));
 
@@ -44,7 +45,7 @@ class MyAppState extends State<MyApp> with UiHelper {
     //Example(name: 'Live streaming over multiple channels', category: 'DEVELOP', id: 'multiple_channels'),
     // Integrate features
     //Example(name: 'Audio and voice effects', category: 'INTEGRATE FEATURES', id: 'audio_voice_effects'),
-    //Example(name: '3D Spatial audio', category: 'INTEGRATE FEATURES', id: 'spatial_audio'),
+    Example(name: '3D Spatial audio', category: 'INTEGRATE FEATURES', id: 'spatial_audio'),
     Example(name: 'Geofencing', category: 'INTEGRATE FEATURES', id: 'geofencing'),
     //Example(name: 'Virtual background', category: 'INTEGRATE FEATURES', id: 'virtual_background'),
     //Example(name: 'AI noise suppression', category: 'INTEGRATE FEATURES', id: 'ai_noise_suppression'),
@@ -136,18 +137,25 @@ class MyAppState extends State<MyApp> with UiHelper {
           MaterialPageRoute(builder: (context) => MediaStreamEncryptionScreen(selectedProduct: selectedProduct)),
         );
         break;
-      case 'geofencing':
-        Navigator.push(
-          context,
-          MaterialPageRoute(builder: (context) => GeofencingScreen(selectedProduct: selectedProduct)),
-        );
-        break;
       case 'stream_media':
         Navigator.push(
           context,
           MaterialPageRoute(builder: (context) => PlayMediaScreen(selectedProduct: selectedProduct)),
         );
         break;
+      case 'geofencing':
+        Navigator.push(
+          context,
+          MaterialPageRoute(builder: (context) => GeofencingScreen(selectedProduct: selectedProduct)),
+        );
+        break;
+      case 'spatial_audio':
+      Navigator.push(
+        context,
+        MaterialPageRoute(builder: (context) => SpatialAudioScreen(selectedProduct: selectedProduct)),
+      );
+      break;
+
       default:
         // not implemented yet
     }

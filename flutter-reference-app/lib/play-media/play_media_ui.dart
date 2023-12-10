@@ -34,7 +34,7 @@ class PlayMediaScreenState extends State<PlayMediaScreen> with UiHelper {
       scaffoldMessengerKey: scaffoldMessengerKey,
       home: Scaffold(
           appBar: AppBar(
-            title: const Text('Secure authentication with tokens'),
+            title: const Text('Stream media to a channel'),
           ),
           body: ListView(
             padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 4),

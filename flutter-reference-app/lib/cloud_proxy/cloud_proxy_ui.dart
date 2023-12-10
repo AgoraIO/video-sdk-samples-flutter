@@ -33,7 +33,7 @@ class CloudProxyScreenState extends State<CloudProxyScreen> with UiHelper {
       scaffoldMessengerKey: scaffoldMessengerKey,
       home: Scaffold(
           appBar: AppBar(
-            title: const Text('Secure authentication with tokens'),
+            title: const Text('Cloud proxy'),
           ),
           body: ListView(
             padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 4),
