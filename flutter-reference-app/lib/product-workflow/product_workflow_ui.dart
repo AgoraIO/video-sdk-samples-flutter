@@ -79,6 +79,8 @@ class ProductWorkflowScreenState extends State<ProductWorkflowScreen>
           child: Slider(
             min: 0,
             max: 200,
+            divisions: 20,
+            label: 'Volume: $volume',
             value: volume.toDouble(),
             onChanged: (value) => {onVolumeChanged(value)},
           ),
