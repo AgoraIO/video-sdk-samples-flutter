@@ -3,6 +3,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_reference_app/agora-manager/agora_manager.dart';
 import 'package:flutter_reference_app/agora-manager/ui_helper.dart';
 import 'package:agora_rtc_engine/agora_rtc_engine.dart';
+import 'agora_manager_product_workflow.dart';
 
 class ProductWorkflowScreen extends StatefulWidget {
   final ProductName selectedProduct;
@@ -19,6 +20,9 @@ class ProductWorkflowScreenState extends State<ProductWorkflowScreen>
   bool isAgoraManagerInitialized = false;
   final GlobalKey<ScaffoldMessengerState> scaffoldMessengerKey =
       GlobalKey<ScaffoldMessengerState>(); // Global key to access the scaffold
+  int volume = 100;
+  bool isMuted = false;
+  bool isScreenShared = false;
 
   // Build UI
   @override
@@ -51,9 +55,72 @@ class ProductWorkflowScreenState extends State<ProductWorkflowScreen>
                   child: Text(agoraManager.isJoined ? "Leave" : "Join"),
                 ),
               ),
+              volumeControl(),
+              ElevatedButton(
+                onPressed: agoraManager.isJoined ? () => {shareScreen()} : null,
+                child: Text(
+                    isScreenShared ? "Stop screen sharing" : "Share screen"),
+              ),
+              screenSharePreview(),
             ],
           )),
     );
+  }
+
+  Widget volumeControl() {
+    return Row(
+      children: <Widget>[
+        Checkbox(
+            value: isMuted,
+            onChanged: (isMuted) => {onMuteChecked(isMuted!)}
+        ),
+        const Text("Mute"),
+        Expanded(
+          child: Slider(
+            min: 0,
+            max: 200,
+            value: volume.toDouble(),
+            onChanged: (value) => {onVolumeChanged(value)},
+          ),
+        ),
+      ],
+    );
+  }
+
+  Widget screenSharePreview() {
+    if (isScreenShared) {
+      return agoraManager.getLocalScreenView();
+    } else {
+     return Container();
+    }
+  }
+
+  void shareScreen() {
+    isScreenShared = !isScreenShared;
+
+    if (isScreenShared) {
+      agoraManager.startScreenShare();
+    } else {
+      agoraManager.stopScreenShare();
+    }
+
+    setState(() {
+
+    });
+  }
+
+  onMuteChecked(bool value) {
+    setState(() {
+      isMuted = value;
+      agoraManager.mute(isMuted);
+    });
+  }
+
+  onVolumeChanged(double newValue) {
+    setState(() {
+      volume = newValue.toInt();
+      agoraManager.adjustVolume(volume);
+    });
   }
 
   @override

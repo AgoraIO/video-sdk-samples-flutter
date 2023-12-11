@@ -50,4 +50,56 @@ class AgoraManagerProductWorkflow extends AgoraManagerAuthentication {
     // Register the event handler
     agoraEngine!.registerEventHandler(getEventHandler());
   }
+
+  void adjustVolume(int volume) {
+    agoraEngine!.adjustRecordingSignalVolume(volume);
+  }
+
+    Future<void> startScreenShare() async {
+
+    agoraEngine!.startScreenCapture(const ScreenCaptureParameters2(
+        captureAudio: true,
+        audioParams: ScreenAudioParameters(
+            sampleRate: 16000, channels: 2, captureSignalVolume: 100),
+        captureVideo: true,
+        videoParams: ScreenVideoParameters(
+            dimensions: VideoDimensions(height: 1280, width: 720),
+            frameRate: 15,
+            bitrate: 600)));
+
+    updateChannelMediaOptions(true);
+  }
+
+  void updateChannelMediaOptions(bool isScreenShared) {
+    // Update channel media options to publish camera or screen capture streams
+    ChannelMediaOptions options = ChannelMediaOptions(
+      publishCameraTrack: !isScreenShared,
+      publishMicrophoneTrack: !isScreenShared,
+      publishScreenTrack: isScreenShared,
+      publishScreenCaptureAudio: isScreenShared,
+      publishScreenCaptureVideo: isScreenShared,
+    );
+
+    agoraEngine!.updateChannelMediaOptions(options);
+  }
+
+  AgoraVideoView getLocalScreenView() {
+    return AgoraVideoView(
+        controller: VideoViewController(
+          rtcEngine: agoraEngine!,
+          canvas: const VideoCanvas(
+            uid: 0,
+            sourceType: VideoSourceType.videoSourceScreen,
+          ),
+        ));
+  }
+
+  void mute(bool enableMute) {
+    agoraEngine!.muteAllRemoteAudioStreams(enableMute);
+  }
+
+  Future<void> stopScreenShare() async {
+    await agoraEngine!.stopScreenCapture();
+    updateChannelMediaOptions(false);
+  }
 }
