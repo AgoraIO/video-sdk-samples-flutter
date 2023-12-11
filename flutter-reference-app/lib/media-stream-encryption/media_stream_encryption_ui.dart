@@ -36,7 +36,7 @@ class MediaStreamEncryptionScreenState
       scaffoldMessengerKey: scaffoldMessengerKey,
       home: Scaffold(
           appBar: AppBar(
-            title: const Text('Secure authentication with tokens'),
+            title: const Text('Media stream encryption'),
           ),
           body: ListView(
             padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 4),
