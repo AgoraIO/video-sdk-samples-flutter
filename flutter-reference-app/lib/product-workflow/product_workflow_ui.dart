@@ -23,6 +23,7 @@ class ProductWorkflowScreenState extends State<ProductWorkflowScreen>
   int volume = 100;
   bool isMuted = false;
   bool isScreenShared = false;
+  VolumeTypes? selectedVolumeType = VolumeTypes.recordingSignalVolume;
 
   // Build UI
   @override
@@ -68,13 +69,27 @@ class ProductWorkflowScreenState extends State<ProductWorkflowScreen>
   }
 
   Widget volumeControl() {
-    return Row(
+    return Column(children: <Widget>[
+    Row(
+    children: <Widget>[
+      const Text('Volume setting:  '),
+      DropdownButton<VolumeTypes>(
+        value: selectedVolumeType,
+        onChanged: (VolumeTypes? newValue) {
+          setState(() {
+            selectedVolumeType = newValue;
+          });
+        },
+        items: VolumeTypes.values.map((VolumeTypes volumeType) {
+          return DropdownMenuItem<VolumeTypes>(
+            value: volumeType,
+            child: Text(describeEnum(volumeType)),
+          );
+        }).toList(),
+      ),
+      ]),
+      Row(
       children: <Widget>[
-        Checkbox(
-            value: isMuted,
-            onChanged: (isMuted) => {onMuteChecked(isMuted!)}
-        ),
-        const Text("Mute"),
         Expanded(
           child: Slider(
             min: 0,
@@ -85,13 +100,27 @@ class ProductWorkflowScreenState extends State<ProductWorkflowScreen>
             onChanged: (value) => {onVolumeChanged(value)},
           ),
         ),
+        Checkbox(
+            value: isMuted,
+            onChanged: (isMuted) => {onMuteChecked(isMuted!)}
+        ),
+        const Text("Mute all"),
       ],
+    ),
+    ]
     );
   }
 
   Widget screenSharePreview() {
     if (isScreenShared) {
-      return agoraManager.getLocalScreenView();
+      return  Container(
+          height: 240,
+          decoration: BoxDecoration(border: Border.all()),
+          margin: const EdgeInsets.only(bottom: 5),
+          child: Center(
+          child: agoraManager.getLocalScreenView()
+          )
+        );
     } else {
      return Container();
     }
@@ -121,7 +150,7 @@ class ProductWorkflowScreenState extends State<ProductWorkflowScreen>
   onVolumeChanged(double newValue) {
     setState(() {
       volume = newValue.toInt();
-      agoraManager.adjustVolume(volume);
+      agoraManager.adjustVolume(selectedVolumeType!, volume);
     });
   }
 
@@ -178,6 +207,27 @@ class ProductWorkflowScreenState extends State<ProductWorkflowScreen>
       case 'onUserOffline':
         onUserOffline(eventArgs["remoteUid"]);
         break;
+    }
+  }
+
+  String describeEnum(VolumeTypes volumeType) {
+    switch (volumeType) {
+      case VolumeTypes.playbackSignalVolume:
+        return "Playback Signal Volume";
+      case VolumeTypes.recordingSignalVolume:
+        return "Recording Signal Volume";
+      case VolumeTypes.userPlaybackSignalVolume:
+        return "User Playback Signal Volume";
+      case VolumeTypes.audioMixingVolume:
+        return "Audio Mixing Volume";
+      case VolumeTypes.audioMixingPlayoutVolume:
+        return "Audio Mixing Playout Volume";
+      case VolumeTypes.audioMixingPublishVolume:
+        return "Audio Mixing Publish Volume";
+      case VolumeTypes.customAudioPlayoutVolume:
+        return "Custom Audio Playout Volume";
+      case VolumeTypes.customAudioPublishVolume:
+        return "Custom Audio Playout Volume";
     }
   }
 

@@ -51,13 +51,45 @@ class AgoraManagerProductWorkflow extends AgoraManagerAuthentication {
     agoraEngine!.registerEventHandler(getEventHandler());
   }
 
-  void adjustVolume(int volume) {
-    agoraEngine!.adjustRecordingSignalVolume(volume);
+  void adjustVolume(VolumeTypes volumeParameter, int volume) {
+    switch (volumeParameter) {
+      case VolumeTypes.playbackSignalVolume:
+        agoraEngine?.adjustPlaybackSignalVolume(volume);
+        break;
+      case VolumeTypes.recordingSignalVolume:
+        agoraEngine?.adjustRecordingSignalVolume(volume);
+        break;
+      case VolumeTypes.userPlaybackSignalVolume:
+        if (remoteUids.isNotEmpty) {
+          int remoteUid = remoteUids.first; // the uid of the remote user
+          agoraEngine?.adjustUserPlaybackSignalVolume(
+              uid: remoteUid, volume: volume);
+        }
+        break;
+      case VolumeTypes.audioMixingVolume:
+        agoraEngine?.adjustAudioMixingVolume(volume);
+        break;
+      case VolumeTypes.audioMixingPlayoutVolume:
+        agoraEngine?.adjustAudioMixingPlayoutVolume(volume);
+        break;
+      case VolumeTypes.audioMixingPublishVolume:
+        agoraEngine?.adjustAudioMixingPublishVolume(volume);
+        break;
+      case VolumeTypes.customAudioPlayoutVolume:
+        int trackId = 0; // use the id of your custom audio track
+        agoraEngine?.adjustCustomAudioPlayoutVolume(
+            trackId: trackId, volume: volume);
+        break;
+      case VolumeTypes.customAudioPublishVolume:
+        int trackId = 0; // use the id of your custom audio track
+        agoraEngine?.adjustCustomAudioPublishVolume(
+            trackId: trackId, volume: volume);
+        break;
+    }
   }
 
-    Future<void> startScreenShare() async {
-
-    agoraEngine!.startScreenCapture(const ScreenCaptureParameters2(
+  Future<void> startScreenShare() async {
+    agoraEngine?.startScreenCapture(const ScreenCaptureParameters2(
         captureAudio: true,
         audioParams: ScreenAudioParameters(
             sampleRate: 16000, channels: 2, captureSignalVolume: 100),
@@ -80,26 +112,42 @@ class AgoraManagerProductWorkflow extends AgoraManagerAuthentication {
       publishScreenCaptureVideo: isScreenShared,
     );
 
-    agoraEngine!.updateChannelMediaOptions(options);
+    agoraEngine?.updateChannelMediaOptions(options);
   }
 
   AgoraVideoView getLocalScreenView() {
     return AgoraVideoView(
         controller: VideoViewController(
-          rtcEngine: agoraEngine!,
-          canvas: const VideoCanvas(
-            uid: 0,
-            sourceType: VideoSourceType.videoSourceScreen,
-          ),
-        ));
+      rtcEngine: agoraEngine!,
+      canvas: const VideoCanvas(
+        uid: 0,
+        sourceType: VideoSourceType.videoSourceScreen,
+      ),
+    ));
   }
 
-  void mute(bool enableMute) {
-    agoraEngine!.muteAllRemoteAudioStreams(enableMute);
+  void mute(bool muted) {
+    // Stop or resume publishing the local video stream
+    agoraEngine?.muteLocalAudioStream(muted);
+    // Stop or resume subscribing to the video streams of all remote users
+    agoraEngine?.muteAllRemoteAudioStreams(muted);
+    // Stop or resume subscribing to the audio stream of a specified user
+    // agoraEngine?.muteRemoteAudioStream(remoteUid, muted)
   }
 
   Future<void> stopScreenShare() async {
-    await agoraEngine!.stopScreenCapture();
+    await agoraEngine?.stopScreenCapture();
     updateChannelMediaOptions(false);
   }
+}
+
+enum VolumeTypes {
+  playbackSignalVolume,
+  recordingSignalVolume,
+  userPlaybackSignalVolume,
+  audioMixingVolume,
+  audioMixingPlayoutVolume,
+  audioMixingPublishVolume,
+  customAudioPlayoutVolume,
+  customAudioPublishVolume,
 }
