@@ -1,4 +1,4 @@
-## Screen share, volume control and mute
+# Screen share, volume control and mute
 
 Users often need to share their screen during online social and business interactions. Video SDK enables you to add screen sharing functionality to your app.
 
