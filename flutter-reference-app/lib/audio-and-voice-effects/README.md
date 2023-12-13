@@ -11,7 +11,7 @@ This sample project shows you how to:
 
 ## Understand the code
 
-For context on this sample, and a full explanation of the essential code snippets used in this project, read the **Geofencing** document for your product of interest:
+For context on this sample, and a full explanation of the essential code snippets used in this project, read the **Audio and voice effects** document for your product of interest:
 
 * [Video calling](https://docs.agora.io/en/video-calling/develop/geofencing?platform=flutter)
 * [Voice calling](https://docs.agora.io/en/voice-calling/develop/geofencing?platform=flutter)
