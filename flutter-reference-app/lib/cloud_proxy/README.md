@@ -1,4 +1,4 @@
-## Connect through restricted networks with Cloud Proxy
+# Connect through restricted networks with Cloud Proxy
 
 You use Agora Cloud Proxy to ensure reliable connectivity for your users when they connect from an environment with a restricted network.
 

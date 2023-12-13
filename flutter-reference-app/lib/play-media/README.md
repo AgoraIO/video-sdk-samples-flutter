@@ -1,4 +1,4 @@
-## Stream media to a channel
+# Stream media to a channel
 
 Users often need to play video and audio files during online social and business interactions. Video SDK enables you to add media playing functionality to your app.
 

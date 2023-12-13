@@ -1,8 +1,13 @@
-# Geofencing
+# Audio and voice effects
 
-When a user joins a channel, Video SDK automatically connects them to the closest geographical region of Agora SD-RTN™. However, to meet the laws and regulations of your region, you may want to filter in or filter out connections to a specific geographical region. Agora geofencing enables you to control and customize data routing in your app by specifying the Agora SD-RTN™ region users connect to.
+Video SDK makes it simple for you to publish audio captured through the microphone to subscribers in a channel. In some cases, users want to modify the captured audio to add sound effects, mix in a pre-recorded audio, or change the voice quality before the audio is published. Video SDK provides several options that enable you to add sound effects, mix in pre-recorded audio, apply voice effects and set the audio route. This page shows you how to implement these features in your channel.
 
-This sample project shows you how to enable Geofencing in your client.
+This sample project shows you how to:
+
+- Set an audio profile and scenario
+- Implement audio effects and audio mixing
+- Apply voice effects
+- Set the audio route
 
 ## Understand the code
 
