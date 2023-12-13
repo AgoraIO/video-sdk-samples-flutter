@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_reference_app/agora-manager/agora_manager.dart';
 import 'package:flutter_reference_app/agora-manager/ui_helper.dart';
+import 'package:flutter_reference_app/audio-and-voice-effects/audio_voice_effects_ui.dart';
 import 'package:flutter_reference_app/cloud_proxy/cloud_proxy_ui.dart';
 import 'package:flutter_reference_app/geofencing/geofencing_ui.dart';
 import 'package:flutter_reference_app/media-stream-encryption/media_stream_encryption_ui.dart';
@@ -45,7 +46,7 @@ class MyAppState extends State<MyApp> with UiHelper {
     //Example(name: 'Stream raw video and audio', category: 'DEVELOP', id: 'raw_video_audio'),
     //Example(name: 'Live streaming over multiple channels', category: 'DEVELOP', id: 'multiple_channels'),
     // Integrate features
-    //Example(name: 'Audio and voice effects', category: 'INTEGRATE FEATURES', id: 'audio_voice_effects'),
+    Example(name: 'Audio and voice effects', category: 'INTEGRATE FEATURES', id: 'audio_voice_effects'),
     Example(name: '3D Spatial audio', category: 'INTEGRATE FEATURES', id: 'spatial_audio'),
     Example(name: 'Geofencing', category: 'INTEGRATE FEATURES', id: 'geofencing'),
     //Example(name: 'Virtual background', category: 'INTEGRATE FEATURES', id: 'virtual_background'),
@@ -160,6 +161,12 @@ class MyAppState extends State<MyApp> with UiHelper {
         Navigator.push(
           context,
           MaterialPageRoute(builder: (context) => ProductWorkflowScreen(selectedProduct: selectedProduct)),
+        );
+        break;
+      case 'audio_voice_effects':
+        Navigator.push(
+          context,
+          MaterialPageRoute(builder: (context) => AudioVoiceEffectsScreen(selectedProduct: selectedProduct)),
         );
         break;
 

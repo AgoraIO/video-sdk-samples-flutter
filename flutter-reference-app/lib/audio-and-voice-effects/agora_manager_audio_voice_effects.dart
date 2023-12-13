@@ -3,8 +3,8 @@ import 'package:flutter_reference_app/authentication-workflow/agora_manager_auth
 import 'package:flutter_reference_app/agora-manager/agora_manager.dart';
 import 'package:permission_handler/permission_handler.dart';
 
-class AgoraManagerGeofencing extends AgoraManagerAuthentication {
-  AgoraManagerGeofencing({
+class AgoraManagerAudioVoiceEffects extends AgoraManagerAuthentication {
+  AgoraManagerAudioVoiceEffects({
     required ProductName currentProduct,
     required Function(String message) messageCallback,
     required Function(String eventName, Map<String, dynamic> eventArgs)
@@ -14,16 +14,16 @@ class AgoraManagerGeofencing extends AgoraManagerAuthentication {
           messageCallback: messageCallback,
           eventCallback: eventCallback,
         ) {
-    // Additional initialization specific to AgoraManagerGeofencing
+    // Additional initialization specific to AgoraManagerAudioVoiceEffects
   }
 
-  static Future<AgoraManagerGeofencing> create({
+  static Future<AgoraManagerAudioVoiceEffects> create({
     required ProductName currentProduct,
     required Function(String message) messageCallback,
     required Function(String eventName, Map<String, dynamic> eventArgs)
         eventCallback,
   }) async {
-    final manager = AgoraManagerGeofencing(
+    final manager = AgoraManagerAudioVoiceEffects(
       currentProduct: currentProduct,
       messageCallback: messageCallback,
       eventCallback: eventCallback,
@@ -35,25 +35,13 @@ class AgoraManagerGeofencing extends AgoraManagerAuthentication {
 
   @override
   Future<void> setupAgoraEngine() async {
-    // Retrieve or request camera and microphone permissions
-    await [Permission.microphone, Permission.camera].request();
+    super.setupAgoraEngine();
 
-    // Create an instance of the Agora engine
-    agoraEngine = createAgoraRtcEngine();
+    // Preload voice effect
+    agoraEngine.preloadEffect(
+        soundId: soundEffectId,
+        filePath: soundEffectFilePath
+    );
 
-    // Define a set of areas using bitwise OR
-    int myAreas = AreaCode.areaCodeEu.value() | AreaCode.areaCodeNa.value();
-
-    await agoraEngine!
-        .initialize(RtcEngineContext(areaCode: myAreas, appId: appId));
-
-    messageCallback("Geofencing enabled");
-
-    if (currentProduct != ProductName.voiceCalling) {
-      await agoraEngine!.enableVideo();
-    }
-
-    // Register the event handler
-    agoraEngine!.registerEventHandler(getEventHandler());
   }
 }

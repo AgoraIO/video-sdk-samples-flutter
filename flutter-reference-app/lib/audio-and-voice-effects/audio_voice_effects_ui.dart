@@ -3,21 +3,45 @@ import 'package:flutter/material.dart';
 import 'package:flutter_reference_app/agora-manager/agora_manager.dart';
 import 'package:flutter_reference_app/agora-manager/ui_helper.dart';
 import 'package:agora_rtc_engine/agora_rtc_engine.dart';
+import 'agora_manager_audio_voice_effects.dart';
 
-class GeofencingScreen extends StatefulWidget {
+class AudioVoiceEffectsScreen extends StatefulWidget {
   final ProductName selectedProduct;
-  const GeofencingScreen({Key? key, required this.selectedProduct})
+  const AudioVoiceEffectsScreen({Key? key, required this.selectedProduct})
       : super(key: key);
 
   @override
-  GeofencingScreenState createState() => GeofencingScreenState();
+  AudioVoiceEffectsScreenState createState() => AudioVoiceEffectsScreenState();
 }
 
-class GeofencingScreenState extends State<GeofencingScreen> with UiHelper {
-  late AgoraManagerGeofencing agoraManager;
+class AudioVoiceEffectsScreenState extends State<AudioVoiceEffectsScreen>
+    with UiHelper {
+  late AgoraManagerAudioVoiceEffects agoraManager;
   bool isAgoraManagerInitialized = false;
   final GlobalKey<ScaffoldMessengerState> scaffoldMessengerKey =
       GlobalKey<ScaffoldMessengerState>(); // Global key to access the scaffold
+
+  int soundEffectStatus = 0;
+  int soundEffectId = 1; // Unique id for the sound effect file
+  String soundEffectFilePath = // URL or path to the sound effect
+      "https://www.soundjay.com/human/applause-01.mp3";
+  String audioFilePath = // URL or path to the audio mixing file
+      "https://www.kozco.com/tech/organfinale.mp3";
+
+  int voiceEffectIndex = 0;
+  bool isAudioPlaying = false; // Manage the audio mixing state
+  bool isEffectPlaying = false;
+  bool isEffectPaused = false;
+  bool isSwitched = true; // Manage the audio route
+
+  var effectCaptions = [
+    'Apply voice effect',
+    'Voice effect: Chat Beautifier',
+    'Voice effect: Singing Beautifier',
+    'Audio effect: Hulk',
+    'Audio effect: Voice Changer',
+    'Audio effect: Voice Equalization'
+  ];
 
   // Build UI
   @override
@@ -33,7 +57,7 @@ class GeofencingScreenState extends State<GeofencingScreen> with UiHelper {
       scaffoldMessengerKey: scaffoldMessengerKey,
       home: Scaffold(
           appBar: AppBar(
-            title: const Text('Geofencing'),
+            title: const Text('AudioVoiceEffects'),
           ),
           body: ListView(
             padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 4),
@@ -50,6 +74,29 @@ class GeofencingScreenState extends State<GeofencingScreen> with UiHelper {
                   child: Text(agoraManager.isJoined ? "Leave" : "Join"),
                 ),
               ),
+              ElevatedButton(
+                onPressed:agoraManager.isJoined ? () => {audioMixing()} : null,
+                child: Text(isAudioPlaying ? "Stop audio mixing"
+                    : "Start audio mixing"),
+              ),
+              ElevatedButton(
+                onPressed: agoraManager.isJoined ? () => {playSoundEffect()} : null,
+                child: isEffectPlaying ?
+                (isEffectPaused ? const Text("Resume audio effect")
+                    : const Text("Pause audio effect"))
+                    : const Text("Play audio effect"),
+              ),
+              ElevatedButton(
+                onPressed: agoraManager.isJoined ? () => {applyVoiceEffect()} : null,
+                child: Text(effectCaptions[voiceEffectIndex]),
+              ),
+              Row(children: [
+                const Text("Enable speakerphone"),
+                Switch(
+                  value: isSwitched,
+                  onChanged: (bool newValue) => {changeAudioRoute(newValue)},
+                ),
+              ]),
             ],
           )),
     );
@@ -63,7 +110,7 @@ class GeofencingScreenState extends State<GeofencingScreen> with UiHelper {
 
   Future<void> initialize() async {
     // Set up an instance of AgoraManager
-    agoraManager = await AgoraManagerGeofencing.create(
+    agoraManager = await AgoraManagerAudioVoiceEffects.create(
       currentProduct: widget.selectedProduct,
       messageCallback: showMessage,
       eventCallback: eventCallback,
@@ -85,6 +132,57 @@ class GeofencingScreenState extends State<GeofencingScreen> with UiHelper {
     agoraManager.dispose();
     super.dispose();
   }
+
+  void audioMixing() {
+    setState(() {
+      isAudioPlaying = !isAudioPlaying;
+    });
+
+    if (isAudioPlaying) {
+      try {
+        agoraEngine.startAudioMixing(filePath: audioFilePath,
+            loopback: false,
+            replace: false,
+            cycle: -1);
+        showMessage("Mixing audio");
+      } on Exception catch(e) {
+        showMessage("Exception playing audio\n ${e.toString()}");
+      }
+    } else {
+      agoraEngine.stopAudioMixing();
+    }
+  }
+
+  void playSoundEffect() {
+    if(isEffectPlaying){
+      if (isEffectPaused){
+        agoraEngine.resumeEffect(soundEffectId);
+        setState(() {
+          isEffectPaused = false;
+        });
+      } else {
+        agoraEngine.pauseEffect(soundEffectId);
+        setState(() {
+          isEffectPaused = true;
+        });
+      }
+    } else {
+      setState(() {
+        isEffectPlaying = true;
+      });
+
+      agoraEngine.playEffect(
+          soundId: soundEffectId,
+          filePath: soundEffectFilePath,
+          publish: true,
+          loopCount: 0,
+          pitch: 1,
+          pan: 0,
+          gain: 100
+      );
+    }
+  }
+
 
   void eventCallback(String eventName, Map<String, dynamic> eventArgs) {
     // Handle the event based on the event name and named arguments
