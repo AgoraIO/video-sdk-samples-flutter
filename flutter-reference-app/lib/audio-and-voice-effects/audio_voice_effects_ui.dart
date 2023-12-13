@@ -38,6 +38,7 @@ class AudioVoiceEffectsScreenState extends State<AudioVoiceEffectsScreen>
     'Apply voice effect',
     'Voice effect: Chat Beautifier',
     'Voice effect: Singing Beautifier',
+    'Voice effect: Adjust formant',
     'Audio effect: Hulk',
     'Audio effect: Voice Changer',
     'Audio effect: Voice Equalization'
@@ -140,28 +141,25 @@ class AudioVoiceEffectsScreenState extends State<AudioVoiceEffectsScreen>
 
     if (isAudioPlaying) {
       try {
-        agoraEngine.startAudioMixing(filePath: audioFilePath,
-            loopback: false,
-            replace: false,
-            cycle: -1);
+        agoraManager.startMixing(audioFilePath, false, 0, -1);
         showMessage("Mixing audio");
       } on Exception catch(e) {
         showMessage("Exception playing audio\n ${e.toString()}");
       }
     } else {
-      agoraEngine.stopAudioMixing();
+      agoraManager.stopMixing();
     }
   }
 
   void playSoundEffect() {
     if(isEffectPlaying){
       if (isEffectPaused){
-        agoraEngine.resumeEffect(soundEffectId);
+        agoraManager.resumeEffect(soundEffectId);
         setState(() {
           isEffectPaused = false;
         });
       } else {
-        agoraEngine.pauseEffect(soundEffectId);
+        agoraManager.pauseEffect(soundEffectId);
         setState(() {
           isEffectPaused = true;
         });
@@ -170,23 +168,70 @@ class AudioVoiceEffectsScreenState extends State<AudioVoiceEffectsScreen>
       setState(() {
         isEffectPlaying = true;
       });
+      agoraManager.playEffect(soundEffectId, soundEffectFilePath);
+    }
+  }
 
-      agoraEngine.playEffect(
-          soundId: soundEffectId,
-          filePath: soundEffectFilePath,
-          publish: true,
-          loopCount: 0,
-          pitch: 1,
-          pan: 0,
-          gain: 100
+  void applyVoiceEffect() {
+    setState(() {
+      voiceEffectIndex++;
+    });
+
+    if (voiceEffectIndex == 1) {
+      agoraManager.setVoiceBeautifierPreset(VoiceBeautifierPreset.chatBeautifierMagnetic);
+    } else if (voiceEffectIndex == 2) {
+      agoraManager.setVoiceBeautifierPreset(VoiceBeautifierPreset.singingBeautifier);
+    } else if (voiceEffectIndex == 3) {
+      // Remove previous effect
+      agoraManager.setVoiceBeautifierPreset(VoiceBeautifierPreset.voiceBeautifierOff);
+      // Change voice formant
+      agoraManager.setLocalVoiceFormant(0.6);
+    } else if (voiceEffectIndex == 4) {
+      // Remove previous effect
+      agoraManager.setLocalVoiceFormant(0.0);
+      // Apply a voice changer effect
+      agoraManager.setAudioEffectPreset(AudioEffectPreset.voiceChangerEffectHulk);
+    } else if (voiceEffectIndex == 5) {
+      // Remove previous effect
+      agoraManager.setAudioEffectPreset(AudioEffectPreset.audioEffectOff);
+      // Apply a voice conversion preset
+      agoraManager.setVoiceConversionPreset(VoiceConversionPreset.voiceChangerCartoon);
+    } else if (voiceEffectIndex == 6) {
+      // Remove previous effect
+      agoraManager.setVoiceConversionPreset(VoiceConversionPreset.voiceConversionOff);
+      // Set local voice equalization
+      agoraManager.setLocalVoiceEqualization(
+          AudioEqualizationBandFrequency.audioEqualizationBand1k,
+          5
+      );
+      agoraManager.setLocalVoicePitch(0.5);
+    } else if (voiceEffectIndex > 6) { // Remove all effects
+      voiceEffectIndex = 0;
+      // Remove voice equalization and pitch modification
+      agoraManager.setLocalVoicePitch(1.0);
+      agoraManager.setLocalVoiceEqualization(
+          AudioEqualizationBandFrequency.audioEqualizationBand1k,
+          0
       );
     }
   }
 
+  void changeAudioRoute(bool newValue) {
+    setState(() {
+      isSwitched = newValue;
+    });
+    agoraManager.setAudioRoute(isSwitched);
+  }
 
   void eventCallback(String eventName, Map<String, dynamic> eventArgs) {
     // Handle the event based on the event name and named arguments
     switch (eventName) {
+      case "onAudioEffectFinished":
+        setState(() {
+          isEffectPlaying = false;
+        });
+        showMessage("Audio effect finished playing");
+        break;
       case 'onConnectionStateChanged':
         // Connection state changed
         if (eventArgs["reason"] ==
