@@ -123,7 +123,7 @@ class AgoraManagerCustomVideoAudio extends AgoraManagerAuthentication {
       isAudioTrackSetup = true;
     }
 
-    Uint8List buffer = Uint8List(1000);
+    Uint8List buffer = Uint8List(100);
     // Add code here to read the audio input stream into a buffer
     buffer = fillBuffer();
 
@@ -145,23 +145,29 @@ class AgoraManagerCustomVideoAudio extends AgoraManagerAuthentication {
   }
 
   Uint8List fillBuffer() {
-    Uint8List buffer = Uint8List(1000);
+    Uint8List buffer = Uint8List(100);
     // Function to fill the buffer with audio samples (e.g., a sine wave)
     const int sampleRate = 16000;
     const double frequency = 440.0; // Frequency of the sine wave in Hz
     const double amplitude = 0.5;
     const double twoPi = 2.0 * pi;
 
-    for (int i = 0; i < buffer.length; i += 2) {
-      double time = i / (2 * sampleRate);
-      double value = amplitude * sin(twoPi * frequency * time);
+    for (int i = 0; i < buffer.length; i += 4) {
+      double time = i / (4 * sampleRate);
 
-      // Convert the double value to a 16-bit signed integer
-      int sample = (value * 32767).toInt();
+      // Calculate samples for left and right channels of a stereo signal
+      double leftValue = amplitude * sin(twoPi * frequency * time);
+      double rightValue = amplitude * sin(twoPi * frequency * 2 * time);
 
-      // Write the sample to the buffer (assuming little-endian format)
-      buffer[i] = sample & 0xFF;
-      buffer[i + 1] = (sample >> 8) & 0xFF;
+      // Convert the double values to 16-bit signed integers
+      int leftSample = (leftValue * 32767).toInt();
+      int rightSample = (rightValue * 32767).toInt();
+
+      // Write the interleaved samples to the buffer (assuming little-endian format)
+      buffer[i] = leftSample & 0xFF;
+      buffer[i + 1] = (leftSample >> 8) & 0xFF;
+      buffer[i + 2] = rightSample & 0xFF;
+      buffer[i + 3] = (rightSample >> 8) & 0xFF;
     }
     return buffer;
   }
