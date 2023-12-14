@@ -35,7 +35,7 @@ class CustomVideoAudioScreenState extends State<CustomVideoAudioScreen>
       scaffoldMessengerKey: scaffoldMessengerKey,
       home: Scaffold(
           appBar: AppBar(
-            title: const Text('CustomVideoAudio'),
+            title: const Text('Custom video and audio'),
           ),
           body: ListView(
             padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 4),
@@ -66,11 +66,11 @@ class CustomVideoAudioScreenState extends State<CustomVideoAudioScreen>
   }
 
   void _pushVideoFrame (){
-
+    agoraManager.pushVideoFrame();
   }
 
   void _pushAudioFrame (){
-
+    agoraManager.pushAudioFrame();
   }
 
   @override
