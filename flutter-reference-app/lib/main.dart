@@ -3,6 +3,7 @@ import 'package:flutter_reference_app/agora-manager/agora_manager.dart';
 import 'package:flutter_reference_app/agora-manager/ui_helper.dart';
 import 'package:flutter_reference_app/audio-and-voice-effects/audio_voice_effects_ui.dart';
 import 'package:flutter_reference_app/cloud_proxy/cloud_proxy_ui.dart';
+import 'package:flutter_reference_app/custom-video-and-audio/custom_video_audio_ui.dart';
 import 'package:flutter_reference_app/geofencing/geofencing_ui.dart';
 import 'package:flutter_reference_app/media-stream-encryption/media_stream_encryption_ui.dart';
 import 'package:flutter_reference_app/play-media/play_media_ui.dart';
@@ -42,7 +43,7 @@ class MyAppState extends State<MyApp> with UiHelper {
     Example(name: 'Screen share, volume control, and mute', category: 'DEVELOP', id: 'product_workflow'),
     Example(name: 'Cloud proxy', category: 'DEVELOP', id: 'cloud_proxy'),
     Example(name: 'Media stream encryption', category: 'DEVELOP', id: 'secure_channel_encryption'),
-    //Example(name: 'Custom video and audio', category: 'DEVELOP', id: 'Custom_video_audio'),
+    Example(name: 'Custom video and audio', category: 'DEVELOP', id: 'custom_video_audio'),
     //Example(name: 'Stream raw video and audio', category: 'DEVELOP', id: 'raw_video_audio'),
     //Example(name: 'Live streaming over multiple channels', category: 'DEVELOP', id: 'multiple_channels'),
     // Integrate features
@@ -169,7 +170,12 @@ class MyAppState extends State<MyApp> with UiHelper {
           MaterialPageRoute(builder: (context) => AudioVoiceEffectsScreen(selectedProduct: selectedProduct)),
         );
         break;
-
+      case 'custom_video_audio':
+        Navigator.push(
+          context,
+          MaterialPageRoute(builder: (context) => CustomVideoAudioScreen(selectedProduct: selectedProduct)),
+        );
+        break;
       default:
         // not implemented yet
     }
