@@ -65,6 +65,14 @@ class CustomVideoAudioScreenState extends State<CustomVideoAudioScreen>
     );
   }
 
+  void _pushVideoFrame (){
+
+  }
+
+  void _pushAudioFrame (){
+
+  }
+
   @override
   void initState() {
     super.initState();

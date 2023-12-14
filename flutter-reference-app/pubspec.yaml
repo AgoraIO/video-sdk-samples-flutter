@@ -32,8 +32,9 @@ dependencies:
   agora_rtc_engine: ^6.2.6
   permission_handler: ^9.2.0
   http: ^0.13.5
+  image: ^3.0.1
 
-  # The following adds the Cupertino Icons font to your application.
+    # The following adds the Cupertino Icons font to your application.
   # Use with the CupertinoIcons class for iOS style icons.
   cupertino_icons: ^1.0.2
 
@@ -55,7 +56,7 @@ dev_dependencies:
 flutter:
   assets:
     - assets/config/config.json
-
+    - assets/agora.png
 
   # The following line ensures that the Material Icons font is
   # included with your application, so that you can use the icons in
