@@ -57,10 +57,9 @@ class AgoraManagerCustomVideoAudio extends AgoraManagerAuthentication {
     // Register the event handler
     agoraEngine!.registerEventHandler(getEventHandler());
 
-    await agoraEngine!.getMediaEngine().setExternalVideoSource(
-        enabled: true,
-        useTexture: false
-    );
+    await agoraEngine!
+        .getMediaEngine()
+        .setExternalVideoSource(enabled: true, useTexture: false);
 
     if (currentProduct != ProductName.voiceCalling) {
       await agoraEngine!.enableVideo();
@@ -68,25 +67,23 @@ class AgoraManagerCustomVideoAudio extends AgoraManagerAuthentication {
 
     await _loadImageByteData();
 
-    await agoraEngine!.startPreview(sourceType: VideoSourceType.videoSourceCustom);
-
+    await agoraEngine!
+        .startPreview(sourceType: VideoSourceType.videoSourceCustom);
   }
 
-  void setupCustomAudioTrack() async {
+  Future<void> setupCustomAudioTrack() async {
     // Create a custom audio track
     audioTrackId = await agoraEngine!.getMediaEngine().createCustomAudioTrack(
         trackType: AudioTrackType.audioTrackDirect,
         config: const AudioTrackConfig(
           enableLocalPlayback: true,
-        )
-    );
+        ));
 
     // Set channel media options to publish the custom audio track
     ChannelMediaOptions channelMediaOptions = ChannelMediaOptions(
         publishCustomAudioTrackId: audioTrackId,
         publishMicrophoneTrack: false,
-        publishCustomAudioTrack: true
-    );
+        publishCustomAudioTrack: true);
 
     // Update channel media options
     agoraEngine!.updateChannelMediaOptions(channelMediaOptions);
@@ -95,12 +92,12 @@ class AgoraManagerCustomVideoAudio extends AgoraManagerAuthentication {
   Future<void> _loadImageByteData() async {
     ByteData data = await rootBundle.load("assets/agora.png");
     Uint8List bytes =
-      data.buffer.asUint8List(data.offsetInBytes, data.lengthInBytes);
+        data.buffer.asUint8List(data.offsetInBytes, data.lengthInBytes);
 
     ui.Image image = await decodeImageFromList(bytes);
 
     final byteData =
-      await image.toByteData(format: ui.ImageByteFormat.rawStraightRgba);
+        await image.toByteData(format: ui.ImageByteFormat.rawStraightRgba);
 
     _imageByteData = byteData!.buffer.asUint8List();
     _imageWidth = image.width;
@@ -109,22 +106,20 @@ class AgoraManagerCustomVideoAudio extends AgoraManagerAuthentication {
   }
 
   Future<void> pushVideoFrame() async {
-
     ExternalVideoFrame agoraFrame = ExternalVideoFrame(
         type: VideoBufferType.videoBufferRawData,
-        format:  VideoPixelFormat.videoPixelRgba,
+        format: VideoPixelFormat.videoPixelRgba,
         buffer: _imageByteData,
         stride: _imageWidth,
         height: _imageHeight,
         timestamp: DateTime.now().millisecondsSinceEpoch);
 
-    await agoraEngine!.getMediaEngine().pushVideoFrame(
-        frame: agoraFrame);
+    await agoraEngine!.getMediaEngine().pushVideoFrame(frame: agoraFrame);
   }
 
   Future<void> pushAudioFrame() async {
     if (!isAudioTrackSetup) {
-      setupCustomAudioTrack();
+      await setupCustomAudioTrack();
       isAudioTrackSetup = true;
     }
 
@@ -144,11 +139,10 @@ class AgoraManagerCustomVideoAudio extends AgoraManagerAuthentication {
     );
 
     await agoraEngine!.getMediaEngine().pushAudioFrame(
-        frame: audioFrame,
-        trackId: audioTrackId,
-    );
+          frame: audioFrame,
+          trackId: audioTrackId,
+        );
   }
-
 
   Uint8List fillBuffer() {
     Uint8List buffer = Uint8List(1000);
