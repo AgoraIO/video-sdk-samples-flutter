@@ -12,6 +12,7 @@ import 'package:flutter_reference_app/sdk-quickstart/sdk_quickstart_ui.dart';
 import 'package:flutter_reference_app/authentication-workflow/authentication_workflow_ui.dart';
 import 'package:flutter_reference_app/ensure-channel-quality/call_quality_ui.dart';
 import 'package:flutter_reference_app/spatial-audio/spatial_audio_ui.dart';
+import 'package:flutter_reference_app/stream-raw-video-and-audio/raw_video_audio_ui.dart';
 
 void main() => runApp(const MaterialApp(home: MyApp()));
 
@@ -44,7 +45,7 @@ class MyAppState extends State<MyApp> with UiHelper {
     Example(name: 'Cloud proxy', category: 'DEVELOP', id: 'cloud_proxy'),
     Example(name: 'Media stream encryption', category: 'DEVELOP', id: 'secure_channel_encryption'),
     Example(name: 'Custom video and audio', category: 'DEVELOP', id: 'custom_video_audio'),
-    //Example(name: 'Stream raw video and audio', category: 'DEVELOP', id: 'raw_video_audio'),
+    Example(name: 'Stream raw video and audio', category: 'DEVELOP', id: 'raw_video_audio'),
     //Example(name: 'Live streaming over multiple channels', category: 'DEVELOP', id: 'multiple_channels'),
     // Integrate features
     Example(name: 'Audio and voice effects', category: 'INTEGRATE FEATURES', id: 'audio_voice_effects'),
@@ -174,6 +175,12 @@ class MyAppState extends State<MyApp> with UiHelper {
         Navigator.push(
           context,
           MaterialPageRoute(builder: (context) => CustomVideoAudioScreen(selectedProduct: selectedProduct)),
+        );
+        break;
+      case 'raw_video_audio':
+        Navigator.push(
+          context,
+          MaterialPageRoute(builder: (context) => RawVideoAudioScreen(selectedProduct: selectedProduct)),
         );
         break;
       default:

@@ -35,7 +35,7 @@ class RawVideoAudioScreenState extends State<RawVideoAudioScreen>
       scaffoldMessengerKey: scaffoldMessengerKey,
       home: Scaffold(
           appBar: AppBar(
-            title: const Text('RawVideoAudio'),
+            title: const Text('Raw video and audio processing'),
           ),
           body: ListView(
             padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 4),
@@ -52,6 +52,10 @@ class RawVideoAudioScreenState extends State<RawVideoAudioScreen>
                   child: Text(agoraManager.isJoined ? "Leave" : "Join"),
                 ),
               ),
+          ElevatedButton(
+            onPressed: agoraManager.isJoined ? () => {audioRecording()} : null,
+            child: Text(agoraManager.isRecording ? "Stop Frame Recording" : "Start Frame Recording"),
+          ),
             ],
           )),
     );
@@ -86,6 +90,18 @@ class RawVideoAudioScreenState extends State<RawVideoAudioScreen>
   Future<void> dispose() async {
     agoraManager.dispose();
     super.dispose();
+  }
+
+  void audioRecording() {
+    if (!agoraManager.isRecording) {
+      setState(() {
+        agoraManager.startAudioFrameRecord();
+      });
+    } else {
+      setState(() {
+        agoraManager.stopAudioFrameRecord();
+      });
+    }
   }
 
   void eventCallback(String eventName, Map<String, dynamic> eventArgs) {

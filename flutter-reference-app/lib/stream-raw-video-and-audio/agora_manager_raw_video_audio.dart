@@ -1,5 +1,4 @@
 import 'dart:io';
-
 import 'package:agora_rtc_engine/agora_rtc_engine.dart';
 import 'package:flutter/cupertino.dart';
 import 'package:flutter_reference_app/authentication-workflow/agora_manager_authentication.dart';
@@ -9,10 +8,10 @@ import 'package:path_provider/path_provider.dart';
 import 'package:path/path.dart' as path;
 
 class AgoraManagerRawVideoAudio extends AgoraManagerAuthentication {
-  late File _playbackAudioFile;
   late File _audioFile;
   late AudioFrameObserver audioFrameObserver;
   late VideoFrameObserver videoFrameObserver;
+  bool isRecording = false;
 
   AgoraManagerRawVideoAudio({
     required ProductName currentProduct,
@@ -44,7 +43,8 @@ class AgoraManagerRawVideoAudio extends AgoraManagerAuthentication {
   }
 
   Future<void> write(AudioFrame audioFrame) async {
-    if (!isJoined) {
+    // Write the raw audio frame to a file for playback
+    if (!isJoined || !isRecording) {
       return;
     }
     if (audioFrame.buffer != null) {
@@ -70,49 +70,16 @@ class AgoraManagerRawVideoAudio extends AgoraManagerAuthentication {
     // Register the event handler
     agoraEngine!.registerEventHandler(getEventHandler());
 
-    // Set the format of raw audio data.
-    int sampleRate = 16000, sampleNumOfChannels = 1, samplesPerCall = 1024;
-
-    agoraEngine!.setRecordingAudioFrameParameters(
-        sampleRate: sampleRate,
-        channel: sampleNumOfChannels,
-        mode: RawAudioFrameOpModeType.rawAudioFrameOpModeReadWrite,
-        samplesPerCall: samplesPerCall);
-
-    agoraEngine!.setPlaybackAudioFrameParameters(
-        sampleRate: sampleRate,
-        channel: sampleNumOfChannels,
-        mode: RawAudioFrameOpModeType.rawAudioFrameOpModeReadWrite,
-        samplesPerCall: samplesPerCall);
-
-    agoraEngine!.setMixedAudioFrameParameters(
-        sampleRate: sampleRate,
-        channel: sampleNumOfChannels,
-        samplesPerCall: samplesPerCall);
-
-
-    audioFrameObserver =  AudioFrameObserver(
-        onRecordAudioFrame: (String channelId, AudioFrame audioFrame) async {
-          // Gets the captured audio frame
-          await write(audioFrame);
-        },
-        onPlaybackAudioFrame: (String channelId, AudioFrame audioFrame) {
-          // Gets the audio frame for playback
-          debugPrint('[onPlaybackAudioFrame] audioFrame: ${audioFrame.toJson()}');
-        }
-    );
-
-    agoraEngine!.getMediaEngine().registerAudioFrameObserver(audioFrameObserver);
-
+    // Set up your video frame observer
     videoFrameObserver = VideoFrameObserver(
         onCaptureVideoFrame: (VideoSourceType videoSourceType, VideoFrame videoFrame) {
           // The video data that this callback gets has not been pre-processed
-          // After pre-processing, you can send the processed video data back
+          // After processing, you can send the processed video data back
           // to the SDK through this callback
           debugPrint('[onCaptureVideoFrame] videoFrame: ${videoFrame.toJson()}');
         },
         onRenderVideoFrame: (String channelId, int remoteUid, VideoFrame videoFrame) {
-          // Occurs each time the SDK receives a video frame sent by the remote user.
+          // Occurs each time the SDK receives a video frame sent by a remote user.
           // In this callback, you can get the video data before encoding.
           // You then process the data according to your particular scenario.
         }
@@ -122,48 +89,65 @@ class AgoraManagerRawVideoAudio extends AgoraManagerAuthentication {
   }
 
   Future<void> startAudioFrameRecord() async {
+    isRecording = true;
+    // Set the format of raw audio data.
+    int sampleRate = 16000, numberOfChannels = 1, samplesPerCall = 1024;
+
     Directory appDocDir = Platform.isAndroid
         ? (await getExternalStorageDirectory())!
         : await getApplicationDocumentsDirectory();
 
     _audioFile = File(path.join(appDocDir.absolute.path, 'record_audio.raw'));
     if (await _audioFile.exists()) {
+
       await _audioFile.delete();
     }
     await _audioFile.create();
     messageCallback('onRecordAudioFrame file output to: ${_audioFile.absolute.path}');
 
-    _playbackAudioFile = File(path.join(
-      appDocDir.absolute.path,
-      'playback_audio.raw',
-    ));
-    if (await _playbackAudioFile.exists()) {
-      await _playbackAudioFile.delete();
-    }
-    await _playbackAudioFile.create();
-    messageCallback(
-        'onPlaybackAudioFrame file output to: ${_playbackAudioFile.absolute.path}');
+    audioFrameObserver =  AudioFrameObserver(
+        onRecordAudioFrame: (String channelId, AudioFrame audioFrame) async {
+          // Gets the captured audio frame
+          await write(audioFrame);
+        },
+        onPlaybackAudioFrame: (String channelId, AudioFrame audioFrame) {
+          // Gets the audio frame for playback
+        },
+        onEarMonitoringAudioFrame: (AudioFrame audioFrame) {
+          // Gets the in-ear monitoring audio frame.
+        },
+        onMixedAudioFrame: (String channelId, AudioFrame audioFrame) {
+          // Retrieves the mixed captured and playback audio frame
+        },
+        onPlaybackAudioFrameBeforeMixing: (String channelId, int uid, AudioFrame audioFrame) {
+          // Retrieves the audio frame of a specified user before mixing
+        }
+    );
 
     agoraEngine!.getMediaEngine().registerAudioFrameObserver(audioFrameObserver);
+
     await agoraEngine!.setPlaybackAudioFrameParameters(
-        sampleRate: 32000,
-        channel: 1,
+        sampleRate: sampleRate,
+        channel: numberOfChannels,
         mode: RawAudioFrameOpModeType.rawAudioFrameOpModeReadOnly,
-        samplesPerCall: 1024);
+        samplesPerCall: samplesPerCall);
+
     await agoraEngine!.setRecordingAudioFrameParameters(
-        sampleRate: 32000,
-        channel: 1,
+        sampleRate: sampleRate,
+        channel: numberOfChannels,
         mode: RawAudioFrameOpModeType.rawAudioFrameOpModeReadOnly,
-        samplesPerCall: 1024);
+        samplesPerCall: samplesPerCall);
+
   }
 
   void stopAudioFrameRecord() {
+    isRecording = false;
     agoraEngine!.getMediaEngine().unregisterAudioFrameObserver(audioFrameObserver);
   }
 
   @override
   Future<void> leave() async {
-    agoraEngine!.getMediaEngine().unregisterAudioFrameObserver(audioFrameObserver);
+    // Unregister the video frame observer
     agoraEngine!.getMediaEngine().unregisterVideoFrameObserver(videoFrameObserver);
     super.leave();
   }
