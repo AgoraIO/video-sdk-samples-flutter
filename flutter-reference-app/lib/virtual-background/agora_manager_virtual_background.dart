@@ -78,7 +78,7 @@ class AgoraManagerVirtualBackground extends AgoraManagerAuthentication {
     // Set a background image
     virtualBackgroundSource = const VirtualBackgroundSource(
       backgroundSourceType: BackgroundSourceType.backgroundImg,
-      source: "assets/agora.png");
+      source: "<The local absolute path of the image file>"); // use .png or .jpg
 
     setBackground(virtualBackgroundSource);
   }
