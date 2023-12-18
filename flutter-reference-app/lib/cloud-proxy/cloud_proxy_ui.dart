@@ -3,11 +3,12 @@ import 'package:flutter/material.dart';
 import 'package:flutter_reference_app/agora-manager/agora_manager.dart';
 import 'package:flutter_reference_app/agora-manager/ui_helper.dart';
 import 'package:agora_rtc_engine/agora_rtc_engine.dart';
-import 'package:flutter_reference_app/cloud_proxy/agora_manager_cloud_proxy.dart';
+import 'package:flutter_reference_app/cloud-proxy/agora_manager_cloud_proxy.dart';
 
 class CloudProxyScreen extends StatefulWidget {
   final ProductName selectedProduct;
-  const CloudProxyScreen({Key? key, required this.selectedProduct}) : super(key: key);
+  const CloudProxyScreen({Key? key, required this.selectedProduct})
+      : super(key: key);
 
   @override
   CloudProxyScreenState createState() => CloudProxyScreenState();
@@ -17,7 +18,7 @@ class CloudProxyScreenState extends State<CloudProxyScreen> with UiHelper {
   late AgoraManagerCloudProxy agoraManager;
   bool isAgoraManagerInitialized = false;
   final GlobalKey<ScaffoldMessengerState> scaffoldMessengerKey =
-  GlobalKey<ScaffoldMessengerState>(); // Global key to access the scaffold
+      GlobalKey<ScaffoldMessengerState>(); // Global key to access the scaffold
 
   // Build UI
   @override
@@ -46,7 +47,7 @@ class CloudProxyScreenState extends State<CloudProxyScreen> with UiHelper {
                 height: 40,
                 child: ElevatedButton(
                   onPressed:
-                  agoraManager.isJoined ? () => {leave()} : () => {join()},
+                      agoraManager.isJoined ? () => {leave()} : () => {join()},
                   child: Text(agoraManager.isJoined ? "Leave" : "Join"),
                 ),
               ),
@@ -90,7 +91,7 @@ class CloudProxyScreenState extends State<CloudProxyScreen> with UiHelper {
     // Handle the event based on the event name and named arguments
     switch (eventName) {
       case 'onConnectionStateChanged':
-      // Connection state changed
+        // Connection state changed
         if (eventArgs["reason"] ==
             ConnectionChangedReasonType.connectionChangedLeaveChannel) {
           setState(() {});

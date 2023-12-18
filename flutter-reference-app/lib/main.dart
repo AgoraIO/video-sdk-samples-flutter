@@ -2,7 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_reference_app/agora-manager/agora_manager.dart';
 import 'package:flutter_reference_app/agora-manager/ui_helper.dart';
 import 'package:flutter_reference_app/audio-and-voice-effects/audio_voice_effects_ui.dart';
-import 'package:flutter_reference_app/cloud_proxy/cloud_proxy_ui.dart';
+import 'package:flutter_reference_app/cloud-proxy/cloud_proxy_ui.dart';
 import 'package:flutter_reference_app/custom-video-and-audio/custom_video_audio_ui.dart';
 import 'package:flutter_reference_app/geofencing/geofencing_ui.dart';
 import 'package:flutter_reference_app/media-stream-encryption/media_stream_encryption_ui.dart';
@@ -71,7 +71,11 @@ class MyAppState extends State<MyApp> with UiHelper {
         name: 'Stream raw video and audio',
         category: 'DEVELOP',
         id: 'raw_video_audio'),
-    //Example(name: 'Live streaming over multiple channels', category: 'DEVELOP', id: 'multiple_channels'),
+    Example(
+        name: 'Live streaming over multiple channels',
+        category: 'DEVELOP',
+        id: 'multiple_channels'),
+
     // Integrate features
     Example(
         name: 'Audio and voice effects',
@@ -113,8 +117,10 @@ class MyAppState extends State<MyApp> with UiHelper {
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
             Padding(
-              padding: const EdgeInsets.all(12.0),
-              child: Column(
+              padding: const EdgeInsets.fromLTRB(10.0, 0, 10.0, 0),
+              child: Container(
+                color: Colors.white, // Set the background color here
+                child: Column(
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
                   const Text(
@@ -139,6 +145,7 @@ class MyAppState extends State<MyApp> with UiHelper {
                   ),
                 ],
               ),
+            ),
             ),
             exampleList(),
           ],
