@@ -5,6 +5,7 @@ import 'package:flutter_reference_app/audio-and-voice-effects/audio_voice_effect
 import 'package:flutter_reference_app/cloud-proxy/cloud_proxy_ui.dart';
 import 'package:flutter_reference_app/custom-video-and-audio/custom_video_audio_ui.dart';
 import 'package:flutter_reference_app/geofencing/geofencing_ui.dart';
+import 'package:flutter_reference_app/live-streaming-over-multiple-channels/multiple_channels_ui.dart';
 import 'package:flutter_reference_app/media-stream-encryption/media_stream_encryption_ui.dart';
 import 'package:flutter_reference_app/play-media/play_media_ui.dart';
 import 'package:flutter_reference_app/product-workflow/product_workflow_ui.dart';
@@ -266,6 +267,14 @@ class MyAppState extends State<MyApp> with UiHelper {
           MaterialPageRoute(
               builder: (context) =>
                   NoiseSuppressionScreen(selectedProduct: selectedProduct)),
+        );
+        break;
+      case 'multiple_channels':
+        Navigator.push(
+          context,
+          MaterialPageRoute(
+              builder: (context) =>
+                  MultipleChannelsScreen(selectedProduct: selectedProduct)),
         );
         break;
       default:
