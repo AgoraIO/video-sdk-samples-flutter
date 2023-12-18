@@ -13,6 +13,9 @@ import 'package:flutter_reference_app/authentication-workflow/authentication_wor
 import 'package:flutter_reference_app/ensure-channel-quality/call_quality_ui.dart';
 import 'package:flutter_reference_app/spatial-audio/spatial_audio_ui.dart';
 import 'package:flutter_reference_app/stream-raw-video-and-audio/raw_video_audio_ui.dart';
+import 'package:flutter_reference_app/virtual-background/virtual_background_ui.dart';
+
+import 'ai-noise-suppression/noise_suppression_ui.dart';
 
 void main() => runApp(const MaterialApp(home: MyApp()));
 
@@ -36,23 +39,58 @@ class MyAppState extends State<MyApp> with UiHelper {
       GlobalKey<ScaffoldMessengerState>(); // Global key to access the scaffold
   ProductName selectedProduct = ProductName.videoCalling;
   final List<Example> examples = [
-    Example(name: 'SDK quickstart', category: 'GET STARTED', id: 'sdk_quickstart'),
-    Example(name: 'Secure authentication with tokens', category: 'GET STARTED', id: 'authentication_workflow'),
+    Example(
+        name: 'SDK quickstart', category: 'GET STARTED', id: 'sdk_quickstart'),
+    Example(
+        name: 'Secure authentication with tokens',
+        category: 'GET STARTED',
+        id: 'authentication_workflow'),
     // Develop
-    Example(name: 'Call quality best practice', category: 'DEVELOP', id: 'call_quality'),
-    Example(name: 'Stream media to a channel', category: 'DEVELOP', id: 'stream_media'),
-    Example(name: 'Screen share, volume control, and mute', category: 'DEVELOP', id: 'product_workflow'),
+    Example(
+        name: 'Call quality best practice',
+        category: 'DEVELOP',
+        id: 'call_quality'),
+    Example(
+        name: 'Stream media to a channel',
+        category: 'DEVELOP',
+        id: 'stream_media'),
+    Example(
+        name: 'Screen share, volume control, and mute',
+        category: 'DEVELOP',
+        id: 'product_workflow'),
     Example(name: 'Cloud proxy', category: 'DEVELOP', id: 'cloud_proxy'),
-    Example(name: 'Media stream encryption', category: 'DEVELOP', id: 'secure_channel_encryption'),
-    Example(name: 'Custom video and audio', category: 'DEVELOP', id: 'custom_video_audio'),
-    Example(name: 'Stream raw video and audio', category: 'DEVELOP', id: 'raw_video_audio'),
+    Example(
+        name: 'Media stream encryption',
+        category: 'DEVELOP',
+        id: 'secure_channel_encryption'),
+    Example(
+        name: 'Custom video and audio',
+        category: 'DEVELOP',
+        id: 'custom_video_audio'),
+    Example(
+        name: 'Stream raw video and audio',
+        category: 'DEVELOP',
+        id: 'raw_video_audio'),
     //Example(name: 'Live streaming over multiple channels', category: 'DEVELOP', id: 'multiple_channels'),
     // Integrate features
-    Example(name: 'Audio and voice effects', category: 'INTEGRATE FEATURES', id: 'audio_voice_effects'),
-    Example(name: '3D Spatial audio', category: 'INTEGRATE FEATURES', id: 'spatial_audio'),
-    Example(name: 'Geofencing', category: 'INTEGRATE FEATURES', id: 'geofencing'),
-    //Example(name: 'Virtual background', category: 'INTEGRATE FEATURES', id: 'virtual_background'),
-    //Example(name: 'AI noise suppression', category: 'INTEGRATE FEATURES', id: 'ai_noise_suppression'),
+    Example(
+        name: 'Audio and voice effects',
+        category: 'INTEGRATE FEATURES',
+        id: 'audio_voice_effects'),
+    Example(
+        name: '3D Spatial audio',
+        category: 'INTEGRATE FEATURES',
+        id: 'spatial_audio'),
+    Example(
+        name: 'Geofencing', category: 'INTEGRATE FEATURES', id: 'geofencing'),
+    Example(
+        name: 'Virtual background',
+        category: 'INTEGRATE FEATURES',
+        id: 'virtual_background'),
+    Example(
+        name: 'AI noise suppression',
+        category: 'INTEGRATE FEATURES',
+        id: 'ai_noise_suppression'),
   ];
 
   Map<ProductName, String> productFriendlyNames = {
@@ -114,77 +152,117 @@ class MyAppState extends State<MyApp> with UiHelper {
       case 'sdk_quickstart':
         Navigator.push(
           context,
-          MaterialPageRoute(builder: (context) => SDKQuickstartScreen(selectedProduct: selectedProduct)),
+          MaterialPageRoute(
+              builder: (context) =>
+                  SDKQuickstartScreen(selectedProduct: selectedProduct)),
         );
         break;
       case 'authentication_workflow':
         Navigator.push(
           context,
-          MaterialPageRoute(builder: (context) => AuthenticationWorkflowScreen(selectedProduct: selectedProduct)),
+          MaterialPageRoute(
+              builder: (context) => AuthenticationWorkflowScreen(
+                  selectedProduct: selectedProduct)),
         );
         break;
       case 'call_quality':
         Navigator.push(
           context,
-          MaterialPageRoute(builder: (context) => CallQualityScreen(selectedProduct: selectedProduct)),
+          MaterialPageRoute(
+              builder: (context) =>
+                  CallQualityScreen(selectedProduct: selectedProduct)),
         );
         break;
       case 'cloud_proxy':
         Navigator.push(
           context,
-          MaterialPageRoute(builder: (context) => CloudProxyScreen(selectedProduct: selectedProduct)),
+          MaterialPageRoute(
+              builder: (context) =>
+                  CloudProxyScreen(selectedProduct: selectedProduct)),
         );
         break;
       case 'secure_channel_encryption':
         Navigator.push(
           context,
-          MaterialPageRoute(builder: (context) => MediaStreamEncryptionScreen(selectedProduct: selectedProduct)),
+          MaterialPageRoute(
+              builder: (context) => MediaStreamEncryptionScreen(
+                  selectedProduct: selectedProduct)),
         );
         break;
       case 'stream_media':
         Navigator.push(
           context,
-          MaterialPageRoute(builder: (context) => PlayMediaScreen(selectedProduct: selectedProduct)),
+          MaterialPageRoute(
+              builder: (context) =>
+                  PlayMediaScreen(selectedProduct: selectedProduct)),
         );
         break;
       case 'geofencing':
         Navigator.push(
           context,
-          MaterialPageRoute(builder: (context) => GeofencingScreen(selectedProduct: selectedProduct)),
+          MaterialPageRoute(
+              builder: (context) =>
+                  GeofencingScreen(selectedProduct: selectedProduct)),
         );
         break;
       case 'spatial_audio':
-      Navigator.push(
-        context,
-        MaterialPageRoute(builder: (context) => SpatialAudioScreen(selectedProduct: selectedProduct)),
-      );
-      break;
+        Navigator.push(
+          context,
+          MaterialPageRoute(
+              builder: (context) =>
+                  SpatialAudioScreen(selectedProduct: selectedProduct)),
+        );
+        break;
       case 'product_workflow':
         Navigator.push(
           context,
-          MaterialPageRoute(builder: (context) => ProductWorkflowScreen(selectedProduct: selectedProduct)),
+          MaterialPageRoute(
+              builder: (context) =>
+                  ProductWorkflowScreen(selectedProduct: selectedProduct)),
         );
         break;
       case 'audio_voice_effects':
         Navigator.push(
           context,
-          MaterialPageRoute(builder: (context) => AudioVoiceEffectsScreen(selectedProduct: selectedProduct)),
+          MaterialPageRoute(
+              builder: (context) =>
+                  AudioVoiceEffectsScreen(selectedProduct: selectedProduct)),
         );
         break;
       case 'custom_video_audio':
         Navigator.push(
           context,
-          MaterialPageRoute(builder: (context) => CustomVideoAudioScreen(selectedProduct: selectedProduct)),
+          MaterialPageRoute(
+              builder: (context) =>
+                  CustomVideoAudioScreen(selectedProduct: selectedProduct)),
         );
         break;
       case 'raw_video_audio':
         Navigator.push(
           context,
-          MaterialPageRoute(builder: (context) => RawVideoAudioScreen(selectedProduct: selectedProduct)),
+          MaterialPageRoute(
+              builder: (context) =>
+                  RawVideoAudioScreen(selectedProduct: selectedProduct)),
+        );
+        break;
+      case 'virtual_background':
+        Navigator.push(
+          context,
+          MaterialPageRoute(
+              builder: (context) =>
+                  VirtualBackgroundScreen(selectedProduct: selectedProduct)),
+        );
+        break;
+      case 'ai_noise_suppression':
+        Navigator.push(
+          context,
+          MaterialPageRoute(
+              builder: (context) =>
+                  NoiseSuppressionScreen(selectedProduct: selectedProduct)),
         );
         break;
       default:
-        // not implemented yet
+      // not implemented yet
     }
   }
 
@@ -209,8 +287,8 @@ class MyAppState extends State<MyApp> with UiHelper {
                     contentPadding: const EdgeInsets.fromLTRB(18, 6, 12, 0),
                   ),
                 Container(
-                  padding: const EdgeInsets.symmetric(horizontal: 10,
-                      vertical: 2), // Add vertical space
+                  padding: const EdgeInsets.symmetric(
+                      horizontal: 10, vertical: 2), // Add vertical space
                   child: ListTile(
                     tileColor: Colors.grey[300],
                     visualDensity:
