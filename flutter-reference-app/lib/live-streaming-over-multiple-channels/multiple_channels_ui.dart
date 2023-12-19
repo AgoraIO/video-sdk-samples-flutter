@@ -64,10 +64,10 @@ class MultipleChannelsScreenState extends State<MultipleChannelsScreen>
                   child: !agoraManager.isSecondChannelJoined
                       ? const Text("Join second channel")
                       : const Text("Leave second channel"),
-                  onPressed:  () => {joinSecondChannel()}
+                  onPressed:  () => {secondChannel()}
               ),
               Container(
-                height: 240,
+                height: 120,
                 decoration: BoxDecoration(border: Border.all()),
                 child: Center(child: _secondVideoPanel()),
               ),
@@ -84,12 +84,31 @@ class MultipleChannelsScreenState extends State<MultipleChannelsScreen>
     }
   }
 
-  void joinSecondChannel() async {
-
+  void secondChannel() async {
+    if (agoraManager.isSecondChannelJoined) {
+      agoraManager.leaveSecondChannel();
+    } else {
+      agoraManager.joinSecondChannel();
+    }
   }
 
   Widget _secondVideoPanel() {
-    return const Text('Second video');
+    if (!agoraManager.isSecondChannelJoined) {
+      return const Text(
+        'Join a second channel',
+        textAlign: TextAlign.center,
+      );
+    } else {
+      // Display remote video from the second channel
+      if (agoraManager.remoteUidSecondChannel != null) {
+        return agoraManager.secondChannelVideo();
+      } else {
+        return const Text(
+          'Waiting for a host to join the second channel',
+          textAlign: TextAlign.center,
+        );
+      }
+    }
   }
 
   @override
@@ -126,6 +145,11 @@ class MultipleChannelsScreenState extends State<MultipleChannelsScreen>
   void eventCallback(String eventName, Map<String, dynamic> eventArgs) {
     // Handle the event based on the event name and named arguments
     switch (eventName) {
+      case "secondChannelEvent":
+        setState(() {
+
+        });
+        break;
       case "onChannelMediaRelayStateChanged":
         setState(() {
 

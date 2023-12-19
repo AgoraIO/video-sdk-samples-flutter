@@ -5,22 +5,21 @@ import 'package:permission_handler/permission_handler.dart';
 
 class AgoraManagerMultipleChannels extends AgoraManagerAuthentication {
   // Media relay
-  String destChannelName = "demo2"; //"<name of the destination channel>";
-  String destChannelToken = "007eJxTYJA3XzgpX9lBhT/F8VKw3QPXRTxN+iZ/zMxtnl8+dNbwVK0Cg2WKkYmlhYWFQaqlsYmZsVGSsUWSQaKZRVqiUZqhmZHRVbmG1IZARobfXrNZGRkgEMRnZUhJzc03YmAAAJDtHUI="; //"<access token for the destination channel>";
-  int destUid = 10; // Uid to identify the relay stream in the destination channel
-  String sourceChannelToken = "007eJxTYHjexO611O/vlhAmmaOzLOKOHe2pTU17++XoI0Mv4TTZ+WoKDJYpRiaWFhYWBqmWxiZmxkZJxhZJBolmFmmJRmmGZkZG/fINqQ2BjAw2F61YGRkgEMRnZ0hJzc03NDJmYAAAcvsemA=="; //"<access token for the source channel>"; // Generate with the channelName and uid = 0.
+  String destinationChannelName = ""; // Name of the destination channel
+  String destinationChannelToken = ""; // Access token for the destination channel
+  int destinationChannelUid = 10; // Uid to identify the relay stream in the destination channel
+  String sourceChannelToken = ""; // Access token for the source channel, Generate with the channelName and uid = 0.
   bool isMediaRelaying = false;
   ChannelMediaRelayState relayState = ChannelMediaRelayState.relayStateIdle;
 
   // Join a second channel
   late RtcEngineEx agoraEngineEx;
   late RtcConnection rtcSecondConnection; // Connection object for the second channel
-  String secondChannelName = "<name of the second channel>";
+  String secondChannelName = "demo2"; // Name of the second channel
   int secondChannelUid = 100; // User Id for the second channel
-  String secondChannelToken = "<access token for the second channel>";
+  String secondChannelToken = ""; // Access token for the second channel
   bool isSecondChannelJoined = false; // Track connection state of the second channel
   int? remoteUidSecondChannel; // User Id of the remote user on the second channel
-
 
   AgoraManagerMultipleChannels({
     required ProductName currentProduct,
@@ -33,6 +32,19 @@ class AgoraManagerMultipleChannels extends AgoraManagerAuthentication {
           eventCallback: eventCallback,
         ) {
     // Additional initialization specific to AgoraManagerMultipleChannels
+  }
+
+  @override
+  Future<void> initialize() async {
+    await super.initialize();
+    destinationChannelName = config["destinationChannelName"];
+    destinationChannelUid = int.parse(config["destinationChannelUid"]);
+    destinationChannelToken = config["destinationChannelToken"];
+    sourceChannelToken = config["sourceChannelToken"];
+
+    secondChannelName = config["secondChannelName"];
+    secondChannelUid = int.parse(config["secondChannelUid"]);
+    secondChannelToken = config["secondChannelToken"];
   }
 
   static Future<AgoraManagerMultipleChannels> create({
@@ -81,9 +93,9 @@ class AgoraManagerMultipleChannels extends AgoraManagerAuthentication {
         ), //
         destInfos: [
           ChannelMediaInfo(
-              channelName: destChannelName, // The name of the destination channel
-              uid: destUid, // The Uid to identify the relay stream in the destination channel
-              token: destChannelToken // Token generated with the channelName and uid in destInfos
+              channelName: destinationChannelName, // The name of the destination channel
+              uid: destinationChannelUid, // The Uid to identify the relay stream in the destination channel
+              token: destinationChannelToken // Token generated with the channelName and uid in destInfos
           )
         ],
         destCount: 1);
@@ -101,47 +113,61 @@ class AgoraManagerMultipleChannels extends AgoraManagerAuthentication {
     agoraEngineEx = createAgoraRtcEngineEx();
     await agoraEngineEx.initialize(RtcEngineContext(appId: appId));
     // Register the event handler
-    agoraEngineEx.registerEventHandler(secondChannelEventHandler);
+    agoraEngineEx.registerEventHandler(getEventHandler());
+
     // By default, the video module is disabled, call enableVideo to enable it.
     agoraEngineEx.enableVideo();
 
-    if (isSecondChannelJoined) {
-      agoraEngineEx.leaveChannelEx(
-          connection: rtcSecondConnection
+    ChannelMediaOptions mediaOptions;
+    if (isBroadcaster) { // Host Role
+      mediaOptions = const ChannelMediaOptions(
+          publishCameraTrack: true,
+          publishMicrophoneTrack: true,
+          clientRoleType: ClientRoleType.clientRoleBroadcaster,
+          channelProfile: ChannelProfileType.channelProfileLiveBroadcasting);
+    } else { // Audience Role
+      mediaOptions = const ChannelMediaOptions(
+          autoSubscribeAudio: true,
+          autoSubscribeVideo: true,
+          clientRoleType: ClientRoleType.clientRoleAudience,
+          channelProfile: ChannelProfileType.channelProfileLiveBroadcasting
       );
-      setState(() {
-        isSecondChannelJoined = false;
-      });
-    } else {
-      ChannelMediaOptions mediaOptions;
-      if (_isHost) { // Host Role
-        mediaOptions = const ChannelMediaOptions(
-            publishCameraTrack: true,
-            publishMicrophoneTrack: true,
-            clientRoleType: ClientRoleType.clientRoleBroadcaster,
-            channelProfile: ChannelProfileType.channelProfileLiveBroadcasting);
-      } else { // Audience Role
-        mediaOptions = const ChannelMediaOptions(
-            autoSubscribeAudio: true,
-            autoSubscribeVideo: true,
-            clientRoleType: ClientRoleType.clientRoleAudience,
-            channelProfile: ChannelProfileType.channelProfileLiveBroadcasting
-        );
-      }
-
-      rtcSecondConnection = RtcConnection(
-          channelId: secondChannelName,
-          localUid: secondChannelUid
-      );
-
-      agoraEngine.joinChannelEx(
-        token: secondChannelToken,
-        connection: rtcSecondConnection,
-        options: mediaOptions,
-      );
-
-      isSecondChannelJoined = true;
     }
+
+    rtcSecondConnection = RtcConnection(
+        channelId: secondChannelName,
+        localUid: secondChannelUid
+    );
+
+    if (isValidURL(config['serverUrl'])) { // A valid server url is available
+      // Retrieve a token from the server
+      secondChannelToken = await fetchToken(secondChannelUid, secondChannelName);
+    } else { // use the token from the config.json file
+      secondChannelToken = config['secondChannelToken'];
+    }
+
+    agoraEngineEx.joinChannelEx(
+      token: secondChannelToken,
+      connection: rtcSecondConnection,
+      options: mediaOptions,
+    );
+  }
+
+  void leaveSecondChannel() {
+    agoraEngineEx.leaveChannelEx(
+        connection: rtcSecondConnection
+    );
+    isSecondChannelJoined = false;
+  }
+
+  AgoraVideoView secondChannelVideo() {
+    return AgoraVideoView(
+      controller: VideoViewController.remote(
+          rtcEngine: agoraEngineEx,
+          canvas: VideoCanvas(uid: remoteUidSecondChannel),
+          connection: rtcSecondConnection
+      ),
+    );
   }
 
   @override
@@ -176,16 +202,46 @@ class AgoraManagerMultipleChannels extends AgoraManagerAuthentication {
         super.getEventHandler().onTokenPrivilegeWillExpire!(connection, token);
       },
       onConnectionStateChanged: (RtcConnection connection, ConnectionStateType state, ConnectionChangedReasonType reason) {
-        super.getEventHandler().onConnectionStateChanged!(connection, state, reason);
+        if (connection.channelId == channelName) {
+          super.getEventHandler().onConnectionStateChanged!(
+              connection, state, reason);
+        } else { // second channel
+          if (reason ==
+              ConnectionChangedReasonType.connectionChangedLeaveChannel) {
+            remoteUidSecondChannel = null;
+            isSecondChannelJoined = false;
+            Map<String, dynamic> eventArgs = {};
+            eventCallback("secondChannelEvent", eventArgs);
+          }
+        }
       },
       onJoinChannelSuccess: (RtcConnection connection, int elapsed) {
-        super.getEventHandler().onJoinChannelSuccess!(connection, elapsed);
+        if (connection.channelId == channelName) {
+          super.getEventHandler().onJoinChannelSuccess!(connection, elapsed);
+        } else {
+          messageCallback("Local user uid:${connection.localUid} joined the channel ${connection.channelId!}");
+          isSecondChannelJoined = true;
+          Map<String, dynamic> eventArgs = {};
+          eventCallback("secondChannelEvent", eventArgs);
+        }
       },
       onUserJoined: (RtcConnection connection, int remoteUid, int elapsed) {
-        super.getEventHandler().onUserJoined!(connection, remoteUid, elapsed);
+        if (connection.channelId == channelName) {
+          super.getEventHandler().onUserJoined!(connection, remoteUid, elapsed);
+        } else {
+          remoteUidSecondChannel = remoteUid;
+          Map<String, dynamic> eventArgs = {};
+          eventCallback("secondChannelEvent", eventArgs);
+        }
       },
       onUserOffline: (RtcConnection connection, int remoteUid, UserOfflineReasonType reason) {
-        super.getEventHandler().onUserOffline!(connection, remoteUid, reason);
+        if (connection.channelId == channelName) {
+          super.getEventHandler().onUserOffline!(connection, remoteUid, reason);
+        } else {
+          remoteUidSecondChannel = null;
+          Map<String, dynamic> eventArgs = {};
+          eventCallback("secondChannelEvent", eventArgs);
+        }
       },
     );
   }
