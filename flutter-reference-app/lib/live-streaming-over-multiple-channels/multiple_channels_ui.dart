@@ -35,7 +35,7 @@ class MultipleChannelsScreenState extends State<MultipleChannelsScreen>
       scaffoldMessengerKey: scaffoldMessengerKey,
       home: Scaffold(
           appBar: AppBar(
-            title: const Text('MultipleChannels'),
+            title: const Text('Live streaming over multiple channels'),
           ),
           body: ListView(
             padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 4),
@@ -53,18 +53,18 @@ class MultipleChannelsScreenState extends State<MultipleChannelsScreen>
                 ),
               ),
               ElevatedButton(
+                onPressed: agoraManager.isJoined && !agoraManager.isSecondChannelJoined ? () => channelRelay() : null,
                 child: agoraManager.relayState == ChannelMediaRelayState.relayStateRunning
                     ? const Text("Stop Channel media relay")
                     : agoraManager.relayState == ChannelMediaRelayState.relayStateConnecting
                     ? const Text("Channel media relay connecting ...")
                     : const Text("Start channel media relay"),
-                onPressed: () => {channelRelay()},
               ),
               ElevatedButton(
+                  onPressed: agoraManager.isJoined && !agoraManager.isMediaRelaying ? () => secondChannel() : null,
                   child: !agoraManager.isSecondChannelJoined
                       ? const Text("Join second channel")
                       : const Text("Leave second channel"),
-                  onPressed:  () => {secondChannel()}
               ),
               Container(
                 height: 120,
@@ -104,7 +104,7 @@ class MultipleChannelsScreenState extends State<MultipleChannelsScreen>
         return agoraManager.secondChannelVideo();
       } else {
         return const Text(
-          'Waiting for a host to join the second channel',
+          'Waiting for a user to join the second channel',
           textAlign: TextAlign.center,
         );
       }

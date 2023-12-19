@@ -98,6 +98,25 @@ class MyAppState extends State<MyApp> with UiHelper {
         id: 'ai_noise_suppression'),
   ];
 
+ List<Example> filteredExamples(ProductName product) {
+   List<String> excludedIds;
+
+   if (product == ProductName.videoCalling) {
+     excludedIds = ['multiple_channels'];
+   } else if (product == ProductName.voiceCalling) {
+     excludedIds = ['multiple_channels', 'virtual_background'];
+   } else {
+     excludedIds = [];
+   }
+
+   // Use the where method to filter the list
+   List<Example> filteredList = examples
+       .where((example) => !excludedIds.contains(example.id))
+       .toList();
+
+   return filteredList;
+ }
+
   Map<ProductName, String> productFriendlyNames = {
     ProductName.videoCalling: 'Video Calling',
     ProductName.voiceCalling: 'Voice Calling',
@@ -283,16 +302,18 @@ class MyAppState extends State<MyApp> with UiHelper {
   }
 
   Widget exampleList() {
+    List<Example> filteredList = filteredExamples(selectedProduct);
+
     return Expanded(
       child: ListView.builder(
-        itemCount: examples.length,
+        itemCount: filteredList.length,
         itemBuilder: (context, index) {
-          final example = examples[index];
+          final example = filteredList[index];
           return Column(
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
                 if (index == 0 ||
-                    examples[index - 1].category != example.category)
+                    filteredList[index - 1].category != example.category)
                   ListTile(
                     visualDensity:
                         const VisualDensity(horizontal: 0, vertical: -4),

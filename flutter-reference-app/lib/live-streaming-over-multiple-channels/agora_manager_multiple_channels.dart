@@ -38,12 +38,12 @@ class AgoraManagerMultipleChannels extends AgoraManagerAuthentication {
   Future<void> initialize() async {
     await super.initialize();
     destinationChannelName = config["destinationChannelName"];
-    destinationChannelUid = int.parse(config["destinationChannelUid"]);
+    destinationChannelUid = config["destinationChannelUid"];
     destinationChannelToken = config["destinationChannelToken"];
     sourceChannelToken = config["sourceChannelToken"];
 
     secondChannelName = config["secondChannelName"];
-    secondChannelUid = int.parse(config["secondChannelUid"]);
+    secondChannelUid = config["secondChannelUid"];
     secondChannelToken = config["secondChannelToken"];
   }
 
@@ -108,7 +108,7 @@ class AgoraManagerMultipleChannels extends AgoraManagerAuthentication {
     agoraEngine?.stopChannelMediaRelay();
   }
 
-  void joinSecondChannel() async {
+  Future<void> joinSecondChannel() async {
     // Create an RtcEngineEx instance
     agoraEngineEx = createAgoraRtcEngineEx();
     await agoraEngineEx.initialize(RtcEngineContext(appId: appId));
@@ -141,7 +141,8 @@ class AgoraManagerMultipleChannels extends AgoraManagerAuthentication {
 
     if (isValidURL(config['serverUrl'])) { // A valid server url is available
       // Retrieve a token from the server
-      secondChannelToken = await fetchToken(secondChannelUid, secondChannelName);
+      //secondChannelToken = "007eJxTYPga3lDaJR5pai6z4WDfBdWWwhS2L+V/Nnvd2GOSwnn62XIFBssUIxNLCwsLg1RLYxMzY6MkY4skg0Qzi7REozRDMyOjD1aNqQ2BjAyPduoxMTJAIIjPypCSmptvxMAAAGZCH7M=";
+      secondChannelToken = await fetchToken(0, secondChannelName);
     } else { // use the token from the config.json file
       secondChannelToken = config['secondChannelToken'];
     }
@@ -164,7 +165,10 @@ class AgoraManagerMultipleChannels extends AgoraManagerAuthentication {
     return AgoraVideoView(
       controller: VideoViewController.remote(
           rtcEngine: agoraEngineEx,
-          canvas: VideoCanvas(uid: remoteUidSecondChannel),
+          canvas: VideoCanvas(
+            uid: remoteUidSecondChannel,
+            renderMode: RenderModeType.renderModeFit
+          ),
           connection: rtcSecondConnection
       ),
     );
@@ -210,9 +214,9 @@ class AgoraManagerMultipleChannels extends AgoraManagerAuthentication {
               ConnectionChangedReasonType.connectionChangedLeaveChannel) {
             remoteUidSecondChannel = null;
             isSecondChannelJoined = false;
-            Map<String, dynamic> eventArgs = {};
-            eventCallback("secondChannelEvent", eventArgs);
           }
+          Map<String, dynamic> eventArgs = {};
+          eventCallback("secondChannelEvent", eventArgs);
         }
       },
       onJoinChannelSuccess: (RtcConnection connection, int elapsed) {
