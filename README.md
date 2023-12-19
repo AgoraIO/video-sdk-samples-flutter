@@ -1,4 +1,4 @@
-# Video SDK reference app (Flutter)
+# Agora Video SDK reference app for Flutter
 
 This repository holds the complete code examples presented in the [Agora Video SDK for Flutter](https://docs.agora.io/en/video-calling/overview/product-overview?platform=flutter) documentation. The reference app demonstrates use of Agora Video SDK for real-time audio and video communication. It is a robust and comprehensive documentation reference app, designed to enhance your productivity and understanding. It's built to be flexible, easily extensible, and beginner-friendly.
 

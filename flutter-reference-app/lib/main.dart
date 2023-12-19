@@ -2,9 +2,10 @@ import 'package:flutter/material.dart';
 import 'package:flutter_reference_app/agora-manager/agora_manager.dart';
 import 'package:flutter_reference_app/agora-manager/ui_helper.dart';
 import 'package:flutter_reference_app/audio-and-voice-effects/audio_voice_effects_ui.dart';
-import 'package:flutter_reference_app/cloud_proxy/cloud_proxy_ui.dart';
+import 'package:flutter_reference_app/cloud-proxy/cloud_proxy_ui.dart';
 import 'package:flutter_reference_app/custom-video-and-audio/custom_video_audio_ui.dart';
 import 'package:flutter_reference_app/geofencing/geofencing_ui.dart';
+import 'package:flutter_reference_app/live-streaming-over-multiple-channels/multiple_channels_ui.dart';
 import 'package:flutter_reference_app/media-stream-encryption/media_stream_encryption_ui.dart';
 import 'package:flutter_reference_app/play-media/play_media_ui.dart';
 import 'package:flutter_reference_app/product-workflow/product_workflow_ui.dart';
@@ -71,7 +72,11 @@ class MyAppState extends State<MyApp> with UiHelper {
         name: 'Stream raw video and audio',
         category: 'DEVELOP',
         id: 'raw_video_audio'),
-    //Example(name: 'Live streaming over multiple channels', category: 'DEVELOP', id: 'multiple_channels'),
+    Example(
+        name: 'Live streaming over multiple channels',
+        category: 'DEVELOP',
+        id: 'multiple_channels'),
+
     // Integrate features
     Example(
         name: 'Audio and voice effects',
@@ -93,6 +98,25 @@ class MyAppState extends State<MyApp> with UiHelper {
         id: 'ai_noise_suppression'),
   ];
 
+ List<Example> filteredExamples(ProductName product) {
+   List<String> excludedIds;
+
+   if (product == ProductName.videoCalling) {
+     excludedIds = ['multiple_channels'];
+   } else if (product == ProductName.voiceCalling) {
+     excludedIds = ['multiple_channels', 'virtual_background'];
+   } else {
+     excludedIds = [];
+   }
+
+   // Use the where method to filter the list
+   List<Example> filteredList = examples
+       .where((example) => !excludedIds.contains(example.id))
+       .toList();
+
+   return filteredList;
+ }
+
   Map<ProductName, String> productFriendlyNames = {
     ProductName.videoCalling: 'Video Calling',
     ProductName.voiceCalling: 'Voice Calling',
@@ -113,8 +137,10 @@ class MyAppState extends State<MyApp> with UiHelper {
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
             Padding(
-              padding: const EdgeInsets.all(12.0),
-              child: Column(
+              padding: const EdgeInsets.fromLTRB(10.0, 0, 10.0, 0),
+              child: Container(
+                color: Colors.white, // Set the background color here
+                child: Column(
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
                   const Text(
@@ -139,6 +165,7 @@ class MyAppState extends State<MyApp> with UiHelper {
                   ),
                 ],
               ),
+            ),
             ),
             exampleList(),
           ],
@@ -261,22 +288,32 @@ class MyAppState extends State<MyApp> with UiHelper {
                   NoiseSuppressionScreen(selectedProduct: selectedProduct)),
         );
         break;
+      case 'multiple_channels':
+        Navigator.push(
+          context,
+          MaterialPageRoute(
+              builder: (context) =>
+                  MultipleChannelsScreen(selectedProduct: selectedProduct)),
+        );
+        break;
       default:
       // not implemented yet
     }
   }
 
   Widget exampleList() {
+    List<Example> filteredList = filteredExamples(selectedProduct);
+
     return Expanded(
       child: ListView.builder(
-        itemCount: examples.length,
+        itemCount: filteredList.length,
         itemBuilder: (context, index) {
-          final example = examples[index];
+          final example = filteredList[index];
           return Column(
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
                 if (index == 0 ||
-                    examples[index - 1].category != example.category)
+                    filteredList[index - 1].category != example.category)
                   ListTile(
                     visualDensity:
                         const VisualDensity(horizontal: 0, vertical: -4),

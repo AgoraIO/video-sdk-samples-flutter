@@ -69,8 +69,8 @@ class AgoraManagerAuthentication extends AgoraManager {
       Map<String, dynamic> json = jsonDecode(response.body);
       String newToken = json['rtcToken'];
       // Store the channelName and uid
-      this.channelName = channelName;
-      localUid = uid;
+      //this.channelName = channelName;
+      //localUid = uid;
       // Return the token
       return newToken;
     } else {

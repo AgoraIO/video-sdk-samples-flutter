@@ -58,7 +58,7 @@ class AudioVoiceEffectsScreenState extends State<AudioVoiceEffectsScreen>
       scaffoldMessengerKey: scaffoldMessengerKey,
       home: Scaffold(
           appBar: AppBar(
-            title: const Text('AudioVoiceEffects'),
+            title: const Text('Audio and voice effects'),
           ),
           body: ListView(
             padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 4),

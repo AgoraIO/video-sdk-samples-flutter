@@ -74,7 +74,10 @@ class AgoraManager {
     return AgoraVideoView(
       controller: VideoViewController(
         rtcEngine: agoraEngine!,
-        canvas: const VideoCanvas(uid: 0), // Use uid = 0 for local view
+        canvas: const VideoCanvas(
+          uid: 0,
+          renderMode: RenderModeType.renderModeHidden
+        ), // Use uid = 0 for local view
       ),
     );
   }
