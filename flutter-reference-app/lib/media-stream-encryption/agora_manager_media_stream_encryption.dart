@@ -1,3 +1,6 @@
+import 'dart:convert';
+import 'dart:typed_data';
+
 import 'package:agora_rtc_engine/agora_rtc_engine.dart';
 import 'package:flutter_reference_app/authentication-workflow/agora_manager_authentication.dart';
 import 'package:flutter_reference_app/agora-manager/agora_manager.dart';
@@ -35,6 +38,42 @@ class AgoraManagerMediaStreamEncryption extends AgoraManagerAuthentication {
 
     await manager.initialize();
     return manager;
+  }
+
+  @override
+  Future<void> joinChannelWithToken([String? channelName]) async {
+    // Set up Agora engine
+    if (agoraEngine == null) await setupAgoraEngine();
+
+    enableEncryption();
+    super.joinChannelWithToken(channelName);
+  }
+
+
+  void enableEncryption() {
+    encryptionKey = config['cipherKey'];
+    encryptionSaltBase64 = config['salt'];
+
+    if (encryptionSaltBase64.isEmpty  || encryptionKey.isEmpty) {
+      messageCallback("Please set encryption key and salt");
+      return;
+    }
+
+    // Convert the salt string into the required format
+    Uint8List bytes = base64Decode(encryptionSaltBase64);
+
+    // An object to specify encryption configuration.
+    EncryptionConfig encryptionConfig = EncryptionConfig(
+        encryptionMode: EncryptionMode.aes128Gcm2,
+        encryptionKey: encryptionKey,
+        encryptionKdfSalt: bytes
+    );
+
+    // Enable media encryption using the configuration
+    agoraEngine!.enableEncryption(
+        enabled: true, config: encryptionConfig);
+
+    messageCallback("Media encryption enabled");
   }
 
   @override
