@@ -60,10 +60,10 @@ class AgoraManagerPlayMedia extends AgoraManagerAuthentication {
     agoraEngine!.registerEventHandler(getEventHandler());
   }
 
-    void openMediaFile() {
-      mediaLocation = config['sampleMediaUrl'];
-      _mediaPlayerController.open(url:mediaLocation, startPos:0);
-    }
+  void openMediaFile() {
+    mediaLocation = config['sampleMediaUrl'];
+    _mediaPlayerController.open(url:mediaLocation, startPos:0);
+  }
 
   @override
   Future<void> leave() async {

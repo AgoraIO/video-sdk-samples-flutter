@@ -52,7 +52,7 @@ class AgoraManagerAuthentication extends AgoraManager {
 
   Future<String> fetchToken(int uid, String channelName) async {
     // Set the token role,
-    // use 1 for Host/Broadcaster, 2 for Subscriber/Audience
+    // Use 1 for Host/Broadcaster, 2 for Subscriber/Audience
     int tokenRole = isBroadcaster ? 1 : 2;
 
     // Prepare the Url
@@ -68,9 +68,6 @@ class AgoraManagerAuthentication extends AgoraManager {
       // Parse the JSON.
       Map<String, dynamic> json = jsonDecode(response.body);
       String newToken = json['rtcToken'];
-      // Store the channelName and uid
-      //this.channelName = channelName;
-      //localUid = uid;
       // Return the token
       return newToken;
     } else {
