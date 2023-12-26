@@ -1,6 +1,5 @@
 import 'dart:convert';
 import 'dart:typed_data';
-
 import 'package:agora_rtc_engine/agora_rtc_engine.dart';
 import 'package:flutter_reference_app/authentication-workflow/agora_manager_authentication.dart';
 import 'package:flutter_reference_app/agora-manager/agora_manager.dart';
@@ -51,7 +50,7 @@ class AgoraManagerMediaStreamEncryption extends AgoraManagerAuthentication {
 
 
   void enableEncryption() {
-    encryptionKey = config['cipherKey'];
+    encryptionKey = config['encryptionKey'];
     encryptionSaltBase64 = config['salt'];
 
     if (encryptionSaltBase64.isEmpty  || encryptionKey.isEmpty) {
@@ -79,6 +78,10 @@ class AgoraManagerMediaStreamEncryption extends AgoraManagerAuthentication {
   @override
   RtcEngineEventHandler getEventHandler() {
     return RtcEngineEventHandler(
+      onEncryptionError: (RtcConnection connection,
+          EncryptionErrorType errorType) {
+        messageCallback("Encryption error: ${errorType.toString}");
+      },
       // Occurs when the network connection state changes
       onConnectionStateChanged: (RtcConnection connection,
           ConnectionStateType state, ConnectionChangedReasonType reason) {
