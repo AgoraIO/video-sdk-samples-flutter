@@ -127,6 +127,13 @@ class AgoraManagerAudioVoiceEffects extends AgoraManagerAuthentication {
         eventArgs["soundId"] = soundId;
         eventCallback("onAudioEffectFinished", eventArgs);
       },
+      onAudioMixingStateChanged: (AudioMixingStateType state,
+          AudioMixingReasonType reason) {
+        // Occurs when the playback state of the audio file changes
+      },
+      onAudioRoutingChanged: (int routing) {
+        // Handle audio the routing change
+      },
       onTokenPrivilegeWillExpire: (RtcConnection connection, String token) {
         super.getEventHandler().onTokenPrivilegeWillExpire!(connection, token);
       },

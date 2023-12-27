@@ -88,6 +88,42 @@ class AgoraManagerProductWorkflow extends AgoraManagerAuthentication {
     }
   }
 
+  Future<void> startScreenShareWinMac() async {
+    // Get the list of available windows and displays.
+    List<ScreenCaptureSourceInfo> screenCaptureSourceList;
+    screenCaptureSourceList = await agoraEngine!.getScreenCaptureSources(
+        thumbSize: const SIZE(width: 360, height: 240),
+        iconSize: const SIZE(width: 360, height: 240),
+        includeScreen: false);
+
+    // In a real-life app, you list the sources and let the user choose.
+    // For this demo, get the sourceId of the last item in the list.
+    int? sourceId = screenCaptureSourceList.last.sourceId ?? 0;
+
+    // Share the entire screen or a particular window.
+    if (screenCaptureSourceList.last.type == ScreenCaptureSourceType.screencapturesourcetypeScreen) {
+      // The source is a screen
+      agoraEngine!.startScreenCaptureByDisplayId(
+          displayId: sourceId,
+          regionRect: const Rectangle(),
+          captureParams: const ScreenCaptureParameters(
+            captureMouseCursor: true,
+            frameRate: 30,
+          ));
+    } else {
+      // The source is a window
+      agoraEngine!.startScreenCaptureByWindowId(
+          windowId: sourceId,
+          regionRect: const Rectangle(),
+          captureParams: const ScreenCaptureParameters(
+            captureMouseCursor: true,
+            frameRate: 30,
+          ));
+    }
+
+    updateChannelMediaOptions(true);
+  }
+
   Future<void> startScreenShare() async {
     agoraEngine?.startScreenCapture(const ScreenCaptureParameters2(
         captureAudio: true,
@@ -127,9 +163,9 @@ class AgoraManagerProductWorkflow extends AgoraManagerAuthentication {
   }
 
   void mute(bool muted) {
-    // Stop or resume publishing the local video stream
+    // Stop or resume publishing the local audio stream
     agoraEngine?.muteLocalAudioStream(muted);
-    // Stop or resume subscribing to the video streams of all remote users
+    // Stop or resume subscribing to the audio streams of all remote users
     agoraEngine?.muteAllRemoteAudioStreams(muted);
     // Stop or resume subscribing to the audio stream of a specified user
     // agoraEngine?.muteRemoteAudioStream(remoteUid, muted)
