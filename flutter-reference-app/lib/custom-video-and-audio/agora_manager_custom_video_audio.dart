@@ -124,7 +124,7 @@ class AgoraManagerCustomVideoAudio extends AgoraManagerAuthentication {
     }
 
     Uint8List buffer = Uint8List(100);
-    // Add code here to read the audio input stream into a buffer
+    // Read the custom audio into a buffer
     buffer = fillBuffer();
 
     // Create an audio frame from the buffer
@@ -138,6 +138,7 @@ class AgoraManagerCustomVideoAudio extends AgoraManagerAuthentication {
       renderTimeMs: DateTime.now().millisecondsSinceEpoch, // time stamp
     );
 
+    // Push the audio frame
     await agoraEngine!.getMediaEngine().pushAudioFrame(
           frame: audioFrame,
           trackId: audioTrackId,
